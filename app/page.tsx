@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowDownLeft, ArrowRight, ArrowUpRight, Check, ChevronRight, CircleHelp, Copy, DoorOpen, Flag, Layers3, Link2, LoaderCircle, Menu, MessageSquare, Plus, Radio, RefreshCw, ShieldCheck, Spade, Users, Volume2, VolumeX, X } from "lucide-react";
 
-type Player = { id: string; name: string; chips: number; bet: number; total: number; cards: string[]; folded: boolean; waiting: boolean; left: boolean; bot: boolean; lastAction: string };
+type Player = { id: string; name: string; chips: number; bet: number; total: number; cards: string[]; folded: boolean; waiting: boolean; left: boolean; bot: boolean; lastAction: string; emote?: string; emoteUntil?: number };
 type Room = { code: string; version: number; you: string; hostId: string; practice: boolean; stage: string; hand: number; dealer: number; players: Player[]; board: string[]; currentBet: number; deadline: number | null; turnId: string | null; settledPot: number; results: {id: string; amount: number; hand: string}[]; log: {id: string; message: string; at: number}[]; legal: null | {call: number; check: boolean; min: number; max: number; canRaise: boolean; allIn: boolean} };
 type Session = { code: string; token: string };
 const chips = (n: number) => n.toLocaleString("en-US");
@@ -31,6 +31,9 @@ export default function Home() {
   const [raise, setRaise] = useState(40);
   const [now, setNow] = useState(Date.now());
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
+  const [emote, setEmote] = useState("");
+  const previousRoom = useRef<Room | null>(null);
   const versionRef = useRef(-1);
   const generationRef = useRef(0);
   const audioRef = useRef<AudioContext | null>(null);
@@ -123,6 +126,25 @@ export default function Home() {
     catch { setToast(`Your room code is ${room.code}`); }
   }
 
+  useEffect(() => {
+    const previous = previousRoom.current;
+    previousRoom.current = room;
+    if (!sound || !room || !previous) return;
+    const ctx = audioRef.current;
+    if (!ctx) return;
+    const dealt = room.hand !== previous.hand || room.board.length !== previous.board.length;
+    const bet = room.players.some(p => p.total > (previous.players.find(q => q.id === p.id)?.total || 0));
+    if (!dealt && !bet) return;
+    const length = Math.floor(ctx.sampleRate * (dealt ? .25 : .16));
+    const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+    const samples = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) samples[i] = (Math.random() * 2 - 1) * Math.exp(-i / (length / 5)) * .12;
+    const source = ctx.createBufferSource(); source.buffer = buffer;
+    const filter = ctx.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = dealt ? 1800 : 3200;
+    source.connect(filter); filter.connect(ctx.destination); source.start();
+  }, [room, sound]);
+  useEffect(() => { if (!emote) return; const timer = setTimeout(() => setEmote(""), 2200); return () => clearTimeout(timer); }, [emote]);
+
   const me = room?.players.find(p => p.id === room.you);
   const seated: (Player | undefined)[] = Array(6).fill(undefined);
   if (room && me) {
@@ -138,7 +160,7 @@ export default function Home() {
   const winnerText = room?.results.map(r => `${room.players.find(p => p.id === r.id)?.name} +${chips(r.amount)}`).join(" · ");
   const seconds = room?.deadline ? Math.min(45, Math.max(0, Math.ceil((room.deadline - now) / 1000))) : 0;
 
-  return <div className="app-shell">
+  return <div className={`app-shell room-environment ${room ? "playing" : "in-lobby"} ${logOpen ? "log-open" : ""}`} onClickCapture={event => { if (!sound || !(event.target as HTMLElement).closest("button")) return; const ctx = audioRef.current; if (!ctx) return; const o = ctx.createOscillator(); const g = ctx.createGain(); o.type="sine"; o.frequency.setValueAtTime(280,ctx.currentTime); o.frequency.exponentialRampToValueAtTime(90,ctx.currentTime+.07); g.gain.setValueAtTime(.035,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.08); o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.08); }}>
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <a className="brand" href="/" aria-label="River Room home"><span className="brand-mark"><Spade size={24} fill="currentColor" /></span><span>river<span className="brand-light">room</span><small>POKER, IN GOOD COMPANY.</small></span></a>
       <div className="sidebar-label">YOUR LITTLE POKER CLUB</div>
@@ -148,7 +170,7 @@ export default function Home() {
       <div className="sidebar-bottom"><ShieldCheck size={17} /><span>All the fun. Always play money.</span><small>MADE FOR FRIENDS, NOT FORTUNES.</small></div>
     </aside>
     <div className="main-shell">
-      <header className="topbar"><div className="breadcrumbs"><button className="mobile-toggle icon-btn" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Toggle navigation"><Menu size={20}/></button><span>The club</span><ChevronRight size={14}/><strong>The lounge</strong></div><div className="topbar-right"><span className="connection"><i className={connection === "Reconnecting…" ? "offline" : ""}/>{connection}</span><button className="icon-btn sound-btn" aria-label={sound ? "Mute turn sounds" : "Enable turn sounds"} title={sound ? "Mute sounds" : "Enable sounds"} onClick={() => { if (!audioRef.current) audioRef.current = new AudioContext(); audioRef.current.resume(); setSound(!sound); }}>{sound ? <Volume2 size={18}/> : <VolumeX size={18}/>}</button><div className="profile-avatar">{name ? name[0].toUpperCase() : "G"}</div></div></header>
+      <header className="topbar"><button className="floating-menu icon-btn" aria-label="Open game menu" onClick={() => setMobileMenu(!mobileMenu)}><Menu size={22}/></button><a className="hud-brand" href="/">♠ <strong>RIVER ROOM</strong></a><div className="hud-room">{room ? `${room.practice ? "PRACTICE" : room.code} · HAND #${room.hand}` : "PRIVATE TABLES"}<small>NO-LIMIT HOLD’EM · 10 / 20</small></div><div className="topbar-right"><span className="connection"><i className={connection === "Reconnecting…" ? "offline" : ""}/>{connection}</span><button className="icon-btn" aria-label={sound ? "Mute sounds" : "Enable sounds"} onClick={() => { if (!audioRef.current) audioRef.current = new AudioContext(); audioRef.current.resume(); setSound(!sound); }}>{sound ? <Volume2 size={21}/> : <VolumeX size={21}/>}</button><button className="icon-btn" aria-label="How to play" onClick={() => setRules(true)}><CircleHelp size={21}/></button>{room && <button className="icon-btn" aria-label="Toggle game log" aria-expanded={logOpen} onClick={() => setLogOpen(!logOpen)}><MessageSquare size={21}/></button>}</div></header>
       <main>
         <div className="page-heading"><div><div className="eyebrow"><span/> THE EVENING IS YOURS</div><h1>{room ? "You’re in good company." : "Your next great hand."}</h1><p>{room ? "Settle in. The best part of poker is who’s at the table." : "A little friendly competition. A lot of good company."}</p></div><span className="play-money-badge"><span className="chip-icon">◉</span> PLAY MONEY ONLY</span></div>
         <div className="game-grid">
@@ -157,25 +179,26 @@ export default function Home() {
             <div className={`table-scene ${room ? "in-game" : ""}`}>
               <div className="table-shadow"/>
               <div className="poker-table"><div className="felt-inner"/><div className="felt-brand"><Spade size={18} fill="currentColor"/><span>RIVER ROOM</span><small>GOOD HANDS. GREAT COMPANY.</small></div>
-                <div className="community"><span className="street-label">{room ? stageNames[room.stage] : "A NEW GAME. A GOOD NIGHT."}</span><div className="board">{Array.from({length: 5}, (_, i) => <Card value={room?.board[i]} key={i}/>)}</div><div className="pot"><span className="stack-chips"><i/><i/><i/></span><span>{room?.stage === "showdown" ? "LAST POT" : "TOTAL POT"}<strong>{chips(pot)}</strong></span></div></div>
+                <div className="community"><span className="street-label">{room ? stageNames[room.stage] : "A NEW GAME. A GOOD NIGHT."}</span><div className="board">{Array.from({length: 5}, (_, i) => <Card value={room?.board[i]} key={`${room?.hand}-${i}-${room?.board[i] || "empty"}`}/>)}</div><div className="pot" key={`pot-${pot}`}><div className="physical-pot" aria-hidden="true">{Array.from({length: Math.min(5, Math.max(1, Math.ceil(pot/120)))}, (_, stack) => <span className={`chip-tower tower-${stack}`} key={stack}>{Array.from({length: Math.min(7, Math.max(2, Math.ceil(pot/30)))}, (_, chip) => <i key={chip} style={{bottom:chip*4}}/>)}</span>)}</div><span>{room?.stage === "showdown" ? "LAST POT" : "TOTAL POT"}<strong>{chips(pot)}</strong></span></div></div>
               </div>
               {Array.from({length: 6}, (_, i) => {
                 const p = seated[i]; const turn = p && room?.turnId === p.id;
                 const dealer = p && room?.players[room.dealer]?.id === p.id;
                 const won = p && room?.results.some(r => r.id === p.id);
                 return <div key={p?.id || `empty-${i}`} className={`seat seat-${i} ${p ? "occupied" : "vacant"} ${p?.folded ? "folded" : ""} ${turn ? "on-turn" : ""} ${won ? "winner" : ""}`}>
-                  {p ? <><div className="seat-cards">{p.cards.map((c, n) => <Card key={n} value={c} small/>)}</div><div className="seat-person"><div className={`seat-avatar color-${i}`}>{p.name[0].toUpperCase()}{dealer && <span className="dealer-button" title="Dealer">D</span>}</div><div className="seat-info"><strong>{p.name}{p.id === room?.you && <small>YOU</small>}</strong><span>{chips(p.chips)}<i> ◉</i></span></div>{turn && <span className="turn-timer">{seconds}</span>}</div><span className={`seat-action ${won ? "won" : ""}`}>{won ? "WINNER" : p.waiting ? "Next hand" : p.lastAction || (turn ? "Thinking…" : "")}</span>{p.bet > 0 && room?.stage !== "showdown" && <span className="seat-bet">◉ {chips(p.bet)}</span>}</> : <><div className="empty-seat"><Plus size={17}/></div><span>Open seat</span></>}
+                  {p ? <>{((emote && p.id === room?.you) || (p.emote && (p.emoteUntil || 0) > now)) && <span className="emote-bubble">{p.id === room?.you && emote ? emote : p.emote}</span>}<div className="seat-cards">{p.cards.map((c, n) => <Card key={`${room?.hand}-${n}-${c}`} value={c} small/>)}</div><div className="seat-person"><div className={`seat-avatar color-${i}`}><svg viewBox="0 0 80 80" className="illustrated-avatar" aria-hidden="true"><path d="M5 80Q8 49 40 49T75 80" fill={['#cca66b','#7c9ea2','#b1785b','#829265','#9b7fa2','#b99662'][i]}/><ellipse cx="40" cy="32" rx="20" ry="24" fill="#e7b58e"/><path d="M19 28Q10 3 39 5Q69 2 62 32L54 20Q36 31 25 19Z" fill={i%2 ? '#442f2b' : '#303c3b'}/><circle cx="33" cy="33" r="2" fill="#302c29"/><circle cx="48" cy="33" r="2" fill="#302c29"/><path d="M34 44Q40 49 47 43" stroke="#985a49" strokeWidth="2" fill="none"/></svg>{dealer && <span className="dealer-button" title="Dealer">D</span>}</div><div className="seat-info"><strong>{p.name}{p.id === room?.you && <small>YOU</small>}</strong><span>{chips(p.chips)}<i> ◉</i></span></div>{turn && <span className="turn-timer">{seconds}</span>}</div><span className={`seat-action ${won ? "won" : ""}`}>{won ? "WINNER" : p.waiting ? "Next hand" : p.lastAction || (turn ? "Thinking…" : "")}</span>{p.bet > 0 && room?.stage !== "showdown" && <span className="seat-bet" key={`bet-${p.bet}`}><i className="bet-chip"/><i className="flying-chip"/> {chips(p.bet)}</span>}</> : <><div className="empty-seat"><Plus size={17}/></div><span>Open seat</span></>}
                 </div>;
               })}
               {!room && <span className="table-note">Your people. Your table. Your rules.*</span>}
             </div>
             <div className="table-bottom"><span><Users size={15}/>{room ? `${room.players.filter(p => !p.left).length} / 6 seated` : "2–6 players"}</span><span><span className="tiny-chip">◉</span>2,000 starting chips</span><span><Radio size={15}/>{room?.practice ? "Practice mode" : "Live multiplayer"}</span></div>
           </section>
-          <aside className="right-panel">
+          <aside className="right-panel">{room && <button className="log-close icon-btn" onClick={() => setLogOpen(false)} aria-label="Close game log"><X size={20}/></button>}
             {!room ? <div className="lobby-card"><span className="panel-overline">LET’S MAKE A NIGHT OF IT</span><h2>Take your seat.</h2><p>Round up your friends.<br/>We’ll deal with the cards.</p><div className="mode-tabs"><button className={mode === "create" ? "selected" : ""} onClick={() => {setMode("create");setError("");}}>Create a table</button><button className={mode === "join" ? "selected" : ""} onClick={() => {setMode("join");setError("");}}>Join friends</button></div><form onSubmit={e => { e.preventDefault(); enter(); }}><label htmlFor="player-name">Your table name</label><input id="player-name" maxLength={18} placeholder="What should we call you?" value={name} autoComplete="nickname" onChange={e => setName(e.target.value)}/>{mode === "join" && <><label htmlFor="room-code">Room code</label><input id="room-code" className="code-input" value={code} onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z2-9]/g, "").slice(0, 6))} maxLength={6} placeholder="e.g. RIVER7" autoComplete="off"/></>}{error && <p className="error" role="alert">{error}</p>}<button className="primary-btn create-btn" type="submit" disabled={busy}>{busy ? <LoaderCircle className="spin" size={18}/> : <>{mode === "create" ? "Create a table" : "Join the table"}<ArrowRight size={18}/></>}</button></form><div className="private-hint"><Link2 size={15}/><span>{mode === "create" ? "Get a room code. Share it. You’re in." : "One room code. Everyone at the same table."}</span></div><div className="practice-divider"><span>just getting warmed up?</span></div><button className="practice-btn" disabled={busy} onClick={() => enter(true)}><Spade size={15}/>Try a practice hand<ArrowUpRight size={15}/></button><span className="practice-note">Play against three friendly bots.</span></div>
             : <><div className="room-info"><div className="room-info-title"><span className="panel-overline">{room.practice ? "A LITTLE WARM-UP" : "THE GANG’S ALL HERE"}</span><span className="live-pill">LIVE</span></div><h2>{room.practice ? "Practice makes poker." : "Your table. Your people."}</h2><p>{room.practice ? "Three bots. Real rules. Zero pressure." : "Share your invite and let the good times roll."}</p>{!room.practice && <button className="invite-btn" onClick={copyInvite}><Link2 size={17}/>Invite friends<Copy size={15}/></button>}<div className="hand-meta"><span>Hand <strong>#{room.hand.toString().padStart(2, "0")}</strong></span><span>Blinds <strong>10 / 20</strong></span></div></div><div className="feed-card"><h3><MessageSquare size={16}/>Around the table<span>ACTIVITY</span></h3><div className="feed" ref={feedRef} role="log" aria-label="Table activity">{room.log.map((entry, i) => <div key={entry.id} className={`feed-entry ${i === room.log.length - 1 ? "latest" : ""}`}><i/><p>{entry.message}</p></div>)}</div></div><button className="leave-btn" disabled={busy} onClick={() => command("leave")}><DoorOpen size={15}/>Leave table</button></>}
           </aside>
         </div>
+        {room && <div className="emote-controls" aria-label="Table reactions">{["👋", "😎", "👏", "🍀"].map(emoji => <button key={emoji} disabled={busy} onClick={() => { setEmote(emoji); command("emote", {emoji}); }} aria-label={`Send ${emoji} reaction`}>{emoji}</button>)}</div>}
         {room && <section className="action-panel" aria-label="Game actions"><div className="action-status"><span className={`status-orb ${room.legal ? "your-turn" : ""}`}><Spade size={19}/></span><div><strong>{room.legal ? "Your move. Make it a good one." : room.stage === "showdown" ? winnerText : room.stage === "waiting" ? "A good night starts with a full table." : me?.waiting ? "Your seat is saved for the next hand." : `${room.players.find(p => p.id === room.turnId)?.name || "The table"} is thinking…`}</strong><span>{room.legal ? `You have ${seconds}s to act. ${room.legal.call ? `${chips(room.legal.call)} to call.` : "You can check for free."}` : room.stage === "showdown" ? room.results.map(r => r.hand).filter((v,i,a) => a.indexOf(v) === i).join(" · ") : "Sit back, settle in, and enjoy the game."}</span></div></div>
           {betweenHands ? <div className="between-actions">{me?.chips === 0 && <button className="secondary-btn" disabled={busy} onClick={() => command("rebuy")}><RefreshCw size={15}/>Rebuy 2,000</button>}{host ? <button className="primary-btn" disabled={busy || room.players.filter(p => !p.left && p.chips > 0).length < 2} onClick={() => command("deal")}>{busy ? <LoaderCircle className="spin" size={17}/> : <><Layers3 size={17}/>{room.hand ? "Deal next hand" : "Deal the first hand"}</>}</button> : <span className="waiting-host">Waiting for the host to deal</span>}</div>
           : room.legal ? <div className="betting-controls"><div className="quick-actions"><button className="fold-btn" disabled={busy} onClick={() => command("act", {move: "fold"})}><Flag size={15}/>Fold</button><button className="secondary-btn" disabled={busy} onClick={() => command("act", {move: room.legal!.check ? "check" : "call"})}>{room.legal.check ? <Check size={17}/> : <ArrowDownLeft size={17}/>} {room.legal.check ? "Check" : `Call ${chips(room.legal.call)}`}</button>{room.legal.allIn && <button className="allin-btn" disabled={busy} onClick={() => command("act", {move: "allin"})}>All-in</button>}</div>{room.legal.canRaise && room.legal.max >= room.legal.min && <div className="raise-controls"><label htmlFor="raise-amount" className="sr-only">Raise to amount</label><input id="raise-amount" type="number" min={room.legal.min} max={room.legal.max} step="1" value={raise} onChange={e => setRaise(Number(e.target.value))}/><button className="primary-btn" disabled={busy || !Number.isInteger(raise) || raise < room.legal.min || raise > room.legal.max} onClick={() => command("act", {move: "raise", amount: raise})}>{room.currentBet === 0 ? "Bet" : "Raise to"} {chips(raise)}<ArrowUpRight size={16}/></button></div>}</div> : null}
