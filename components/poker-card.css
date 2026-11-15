@@ -1,0 +1,13 @@
+/* One SVG coordinate system keeps indices, pips and artwork optically aligned. */
+.room-environment .playing-card.professional-card{container-type:inline-size;border:0;padding:0;border-radius:4px;background:#f6f3e9;color:#243931;overflow:hidden;box-shadow:0 1px 0 #c9c2b1,1px 3px 4px #071a1640}
+.room-environment .professional-card.red{color:#a23535}
+.room-environment .professional-card.card-back{padding:0;background:#f1eddf;border:0}
+.room-environment .professional-card>.deck-art{display:block;width:100%;height:100%;color:inherit;overflow:hidden}
+.deck-art .index-rank{font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:600;letter-spacing:-1.3px;fill:currentColor}
+.deck-art .deck-compact-suit{display:none}
+.professional-card.small .deck-art .deck-pips,.professional-card.small .deck-art .deck-court{display:none}
+.professional-card.small .deck-art .deck-compact-suit{display:block}
+.professional-card.small .deck-art .index-rank{font-size:32px;letter-spacing:-1.5px}
+.professional-card.small .deck-art .deck-index>g{display:none}
+@container (max-width:58px){.deck-art .court-finework{display:none}}
+@media(max-width:600px){.room-environment .board .deck-art .index-rank{font-size:38px;transform:translateY(7px)}.room-environment .board .deck-art .deck-index>g,.room-environment .board .deck-pips,.room-environment .board .deck-court{display:none}.room-environment .board .deck-compact-suit{display:block}}

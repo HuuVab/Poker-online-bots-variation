@@ -1,0 +1,50 @@
+/* Materials and short state-driven movement; no changes to game timing. */
+.room-environment{background-color:#261f19;background-image:repeating-linear-gradient(2deg,#c0aa7e03 0 1px,transparent 1px 6px),repeating-linear-gradient(-1deg,transparent 0 22px,#09060412 22px 23px,transparent 23px 47px)}
+.room-environment .poker-table{box-shadow:0 0 0 2px #8c7551,0 0 0 6px #3b2b1f,inset 0 0 0 3px #192a21,inset 0 0 28px #071d1238,0 8px 0 #19140f,0 13px 15px #0007}
+.room-environment .poker-table:before{content:"";position:absolute;inset:1px;border:7px solid #303b2e;border-radius:inherit;box-shadow:inset 0 2px 3px #6a775333,0 1px 2px #080e0870;pointer-events:none}
+.room-environment .poker-table:after{opacity:.36;mix-blend-mode:soft-light}
+.room-environment .felt-inner{inset:17px;border-color:#d2d6b325}
+.room-environment .seat.vacant{width:38px;min-width:38px;display:flex;justify-content:center;align-items:center;gap:0;animation:marker-return 200ms ease-out}
+.room-environment .seat.vacant.seat-3{top:16%;bottom:auto;transform:translate(-50%,-50%)}
+.room-environment .seat.vacant.seat-0{top:84%;bottom:auto;transform:translate(-50%,-50%)}
+.room-environment .seat.vacant.seat-1,.room-environment .seat.vacant.seat-2{left:17%}
+.room-environment .seat.vacant.seat-4,.room-environment .seat.vacant.seat-5{right:17%;left:auto}
+.room-environment .empty-seat{width:38px;height:38px;border:0;padding:0;position:relative;display:grid;place-items:center;background:none;border-radius:50%;opacity:.8}
+.room-environment .seat.vacant .empty-seat{background:none;border:0;box-shadow:none;color:#b5a279}
+.room-environment .empty-seat>svg{width:31px;height:31px;fill:none;stroke:#b5a279;stroke-width:1.2;filter:drop-shadow(0 1px 1px #0006)}
+.room-environment .empty-seat .sit-label{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:#ddd5bd;color:#263b2b;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:500;padding:5px 8px;border:0;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 150ms}
+.room-environment .empty-seat:not(:disabled):hover,.room-environment .empty-seat:focus-visible{opacity:1}
+.room-environment .empty-seat:not(:disabled):hover .sit-label,.room-environment .empty-seat:focus-visible .sit-label{opacity:1}
+.room-environment .empty-seat:disabled{opacity:.5;cursor:default;filter:none}
+.room-environment .seat.occupied .seat-person{animation:station-arrive 220ms ease-out}
+.room-environment .seat.departing{animation:station-leave 180ms ease-in forwards;pointer-events:none}
+.room-environment .seat.departing .seat-person{animation:none}
+.room-environment .on-turn .seat-avatar{box-shadow:0 0 0 2px #c4ad7033,0 0 10px #c4ad701c}
+.room-environment .seat-cards .playing-card.small{animation:dealer-slide 300ms ease-out both}
+.room-environment .seat-cards .playing-card.small:nth-child(2){animation-delay:45ms}
+.room-environment .folded .seat-cards{animation:fold-to-center 260ms ease-in forwards;pointer-events:none}
+.room-environment .folded .seat-cards .playing-card{animation:none!important}
+.room-environment .winner .seat-cards{transform:translateY(-4px);transition:transform 220ms ease-out}
+.room-environment .flying-chip{animation:bet-to-pot 350ms ease-in both}
+.payout-chips{position:absolute;top:0;left:50%;pointer-events:none;z-index:5}
+.payout-chips i{position:absolute;width:20px;height:9px;background:#b6ac8a;border:2px dashed #eee6cf;border-radius:50%;box-shadow:0 2px #57543c;animation:pot-to-winner 380ms ease-out both}
+.payout-chips i:nth-child(2){animation-delay:35ms}.payout-chips i:nth-child(3){animation-delay:70ms}
+.room-identity{display:flex;align-items:center;justify-content:center;gap:9px}.hud-divider{color:#827d68}
+.copy-room-code{display:inline-flex;align-items:center;gap:7px;font-size:12px;letter-spacing:1.8px;padding:6px 0;color:#d9caa4;border:0;border-bottom:1px solid #b1a27c55;border-radius:0;line-height:1.2}
+.copy-room-code:hover{border-color:#d9caa4;color:#eee0ba}.copy-room-code svg{opacity:.7}
+.room-environment.playing .between-actions{border-left:1px solid #b5a47d30;padding-left:18px;margin-left:6px}
+.deal-control{display:flex;align-items:center;gap:12px}.deal-requirement{font-size:11px;color:#b8bca5;max-width:180px;line-height:1.4}
+.room-environment .deal-button:not(:disabled){background:#d6c9a3;color:#253b29;box-shadow:0 3px #7b7051;font-weight:600}
+.room-environment .deal-button:disabled{opacity:1;background:#403f33;color:#939780;box-shadow:none;outline:1px solid #76745b44;cursor:not-allowed}
+.room-environment .seat-reservation{color:#3b583b;font-size:12px;margin-top:12px;border-bottom:1px solid #a8ac8e;padding-bottom:8px}
+@media(min-width:601px){.room-environment .seat.occupied.seat-1,.room-environment .seat.occupied.seat-2{left:8%}.room-environment .seat.occupied.seat-4,.room-environment .seat.occupied.seat-5{right:8%;left:auto}}
+@media(min-width:601px) and (min-height:651px){.room-environment .community{top:50%;transform:translate(-50%,-50%)}.room-environment .pot{margin-top:8px}}
+@media(max-width:600px){.room-environment .seat.occupied.seat-1,.room-environment .seat.occupied.seat-2{left:0}.room-environment .seat.occupied.seat-4,.room-environment .seat.occupied.seat-5{right:0;left:auto}.copy-room-code{font-size:10px;letter-spacing:1px}.room-identity{gap:6px}.deal-control{flex-wrap:wrap;gap:7px}.deal-requirement{font-size:10px;max-width:160px}.room-environment.playing .between-actions{border-left:0;padding-left:0;margin-left:0;justify-content:space-between}.room-environment .poker-table:before{border-width:5px}.room-environment .felt-inner{inset:12px}}
+@keyframes dealer-slide{from{opacity:0;transform:translate(var(--deal-x,0px),var(--deal-y,-25px)) scale(.85)}to{opacity:1;transform:translate(0,0) scale(1)}}
+@keyframes fold-to-center{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--pot-x,0px),var(--pot-y,-30px)) scale(.8)}}
+@keyframes bet-to-pot{0%{opacity:1;transform:translate(0,0)}85%{opacity:1}100%{opacity:0;transform:translate(var(--bet-x,0px),var(--bet-y,-50px))}}
+@keyframes pot-to-winner{0%{opacity:1;transform:translate(var(--payout-x,0px),var(--payout-y,-40px))}85%{opacity:1}100%{opacity:0;transform:translate(0,0)}}
+@keyframes station-arrive{from{opacity:0;transform:translateY(5px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes station-leave{from{opacity:1}to{opacity:0}}
+@keyframes marker-return{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.room-environment *{animation:none!important;transition:none!important}.room-environment .folded .seat-cards{opacity:0}.room-environment .flying-chip,.payout-chips{display:none}}

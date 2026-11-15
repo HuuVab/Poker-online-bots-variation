@@ -63,3 +63,20 @@ test("table capacity, practice isolation and invalid requests",async()=>{
   assert.equal((await send(db,{action:"join",code:p.room.code,name:"Visitor"})).status,400);
   db.sqlite.close();
 });
+
+test("preferred seats, between-hand moves and physical betting order",async()=>{
+  const db=database();const a=await send(db,{action:"create",name:"Alice",seat:4});assert.equal(a.room.players[0].seat,4);
+  const code=a.room.code;const b=await send(db,{action:"join",code,name:"Bob",seat:1});assert.equal(b.room.players.find(p=>p.id===b.room.you).seat,1);
+  assert.equal((await send(db,{action:"join",code,name:"Taken",seat:1})).status,400);
+  let state=(await send(db,{action:"state",code},a.token)).room;
+  const moved=await send(db,{action:"seat",code,version:state.version,seat:3},a.token);assert.equal(moved.status,200);assert.equal(moved.room.players.find(p=>p.id===a.room.you).seat,3);
+  state=moved.room;const deal=await send(db,{action:"deal",code,version:state.version},a.token);assert.equal(deal.status,200);assert.deepEqual(deal.room.players.map(p=>p.seat),[1,3]);
+  assert.equal((await send(db,{action:"seat",code,version:deal.room.version,seat:5},a.token)).status,400);
+  assert.equal((await send(db,{action:"create",name:"Invalid",seat:7})).status,400);db.sqlite.close();
+});
+test("simultaneous clients cannot claim the same physical seat",async()=>{
+  const db=database();const a=await send(db,{action:"create",name:"Host"});const code=a.room.code;
+  const results=await Promise.all([send(db,{action:"join",code,name:"One",seat:3}),send(db,{action:"join",code,name:"Two",seat:3})]);
+  assert.deepEqual(results.map(r=>r.status).sort(),[200,400]);const state=(await send(db,{action:"state",code},a.token)).room;
+  assert.equal(state.players.filter(p=>p.seat===3).length,1);db.sqlite.close();
+});

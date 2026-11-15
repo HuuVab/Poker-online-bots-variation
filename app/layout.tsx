@@ -3,6 +3,7 @@ import "./globals.css";
 import "./room.css";
 import "./table-layout.css";
 import "./club.css";
+import "./table-tactile.css";
 
 export const metadata: Metadata = {
   title: "River Room — A good hand. A great time.",
