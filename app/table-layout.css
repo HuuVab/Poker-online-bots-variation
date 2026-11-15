@@ -1,0 +1,121 @@
+/* Layout ownership: the viewport grid reserves HUD, table, reactions and controls.
+   Seat coordinates belong to this aspect-ratio canvas, never to the viewport. */
+.room-environment.playing .main-shell{height:100svh;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);padding:12px 18px;gap:8px}
+.room-environment.playing .topbar{height:56px;margin:0;min-width:0;padding:0 14px;gap:12px}
+.room-environment.playing main{width:100%;height:100%;min-height:0;max-width:1800px;padding:0;margin:0 auto;align-self:stretch;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:8px}
+.room-environment.playing .game-grid{display:flex;align-items:center;justify-content:center;min-height:0;min-width:0;order:0}
+.room-environment.playing .table-panel{container-type:size;width:100%;height:100%;min-height:0;display:flex;align-items:center;justify-content:center}
+.room-environment.playing .table-scene{container-type:inline-size;position:relative;flex:none;width:min(100%,calc((100svh - 240px)*1.85));height:auto;aspect-ratio:1.85;min-height:0;max-height:none;margin:0;isolation:isolate}
+.room-environment .poker-table{inset:19% 10%;height:auto;border-radius:48% / 49%;border-width:clamp(7px,1.1cqw,15px)}
+.room-environment .felt-inner{inset:14px}.room-environment .felt-brand{top:10%;gap:2px;opacity:.6}
+.room-environment .felt-brand>span{font-size:clamp(11px,1.2cqw,16px);letter-spacing:3px}.room-environment .felt-brand svg,.room-environment .felt-brand>small{display:none}
+.room-environment .community{top:53%;left:50%;transform:translate(-50%,-42%);gap:clamp(5px,1cqw,12px)}
+.room-environment .street-label{font-size:11px;letter-spacing:1px;color:#e1e6cc;line-height:1.3}
+.room-environment .board{gap:clamp(4px,.65cqw,9px)}
+.room-environment .playing-card{width:clamp(35px,4.4cqw,65px);height:auto;aspect-ratio:65/92}
+.room-environment .card-rank{font-size:clamp(15px,1.7cqw,24px);top:5px;left:5px}.room-environment .card-rank small{font-size:clamp(9px,.95cqw,13px)}
+.room-environment .card-suit{font-size:clamp(21px,2.6cqw,37px);right:5px;bottom:7px}.room-environment .card-corner{display:none}
+.room-environment .pot{gap:10px;min-height:0}.room-environment .pot>span:last-child{font-size:11px;letter-spacing:1px}.room-environment .pot strong{font-size:clamp(17px,1.8cqw,24px);line-height:1.15}
+.room-environment .physical-pot{height:29px}.room-environment .chip-tower{width:22px;height:27px}.room-environment .chip-tower i{width:22px;height:9px;border-width:2px}
+/* Each seat is a grid: cards, identity, status and markers have separate cells. */
+.room-environment .seat{--seat-width:clamp(114px,13cqw,176px);width:var(--seat-width);min-width:0;display:grid;grid-template-columns:1fr;grid-template-rows:auto auto auto;gap:5px;align-items:center;justify-items:center;transform:none}
+.room-environment .seat.seat-0{left:50%;top:auto;bottom:0;transform:translateX(-50%)}
+.room-environment .seat.seat-3{left:50%;top:0;bottom:auto;transform:translateX(-50%)}
+.room-environment .seat.seat-1{left:0;top:68%;transform:translateY(-50%)}
+.room-environment .seat.seat-2{left:0;top:29%;transform:translateY(-50%)}
+.room-environment .seat.seat-4{left:auto;right:0;top:29%;transform:translateY(-50%)}
+.room-environment .seat.seat-5{left:auto;right:0;top:68%;transform:translateY(-50%)}
+.room-environment .seat-cards{grid-row:1;display:flex;gap:6px;margin:0;min-height:0;padding:2px 0;line-height:0}
+.room-environment .playing-card.small{width:clamp(26px,3cqw,43px);height:auto;aspect-ratio:43/61;flex:none}
+.room-environment .seat-cards .playing-card:first-child,.room-environment .seat-cards .playing-card:last-child{transform:none}
+.room-environment .small .card-rank{font-size:clamp(11px,1.2cqw,17px);top:3px;left:3px}.room-environment .small .card-rank small{font-size:clamp(7px,.7cqw,10px)}.room-environment .small .card-suit{font-size:clamp(14px,1.7cqw,25px);right:3px;bottom:4px}
+.room-environment .seat-person{grid-row:2;display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px;align-items:center;width:100%;min-width:0;min-height:0;padding:7px;border-radius:12px;position:relative}
+.room-environment .seat-avatar{position:static;width:clamp(31px,3.6cqw,50px);height:auto;aspect-ratio:1;border-width:2px;flex:none;box-shadow:0 3px 8px #0005}
+.room-environment .seat-info{min-width:0;width:100%}.room-environment .seat-info strong{font-size:13px;line-height:1.35;max-width:none;display:block;white-space:normal;overflow-wrap:normal}
+.room-environment .seat-info strong small{font-size:10px;line-height:1.2;letter-spacing:.5px;margin:0;padding:2px 4px;border:1px solid #e4cf91;border-radius:3px;color:#fff1bd;background:#50613b;font-weight:700}
+.room-environment .seat-info>span{display:block;font-size:13px;line-height:1.5;font-variant-numeric:tabular-nums;color:#f4d799;white-space:nowrap}.room-environment .seat-info i{display:none}
+.room-environment .turn-timer{position:absolute;right:0;bottom:calc(100% + 5px);top:auto;width:25px;height:25px;font-size:11px;border-width:1px;flex:none;line-height:1;grid-column:3}
+.room-environment .seat-action{grid-row:3;margin:0;padding:3px 7px;line-height:1.3;min-height:20px;max-width:100%;font-size:11px;white-space:normal;text-align:center;overflow-wrap:anywhere;color:#e0e8d4;background:#11261ff2}
+.room-environment .seat-action:empty{visibility:hidden}
+.room-environment .seat-markers{position:absolute;display:flex;gap:4px;align-items:center;right:calc(100% + 5px);top:60%;width:max-content}
+.room-environment .seat-1 .seat-markers,.room-environment .seat-2 .seat-markers{right:auto;left:0;top:100%}
+.room-environment .seat-4 .seat-markers,.room-environment .seat-5 .seat-markers{right:0;top:100%}
+.room-environment .dealer-button{position:static;display:grid;place-items:center;width:22px;height:22px;font-size:11px;border-width:1px;flex:none}
+.blind-marker{font-size:10px;font-weight:700;color:#f4deb1;background:#4a4532;border:1px solid #a59560;border-radius:4px;padding:3px;line-height:1.3}
+.room-environment .seat-bet{position:absolute;display:flex;align-items:center;gap:4px;inset:auto;width:max-content;max-width:100px;font-size:12px;line-height:1.2;font-variant-numeric:tabular-nums;padding:4px 6px;background:#0b241df5;border:1px solid #c3ac7366}
+.room-environment .seat-0 .seat-bet{bottom:100%;top:auto;left:calc(100% + 8px);right:auto}
+.room-environment .seat-3 .seat-bet{top:100%;bottom:auto;left:calc(100% + 8px);right:auto}
+.room-environment .seat-1 .seat-bet,.room-environment .seat-2 .seat-bet{left:calc(100% + 10px);right:auto;top:55%}
+.room-environment .seat-4 .seat-bet,.room-environment .seat-5 .seat-bet{right:calc(100% + 10px);left:auto;top:55%}
+.room-environment .bet-chip{position:relative;inset:auto;display:block;width:17px;height:8px;flex:none;border-width:2px}
+.room-environment .flying-chip{pointer-events:none}.room-environment .folded .seat-person{opacity:.85}.room-environment .vacant>span{font-size:11px;color:#bdc4ad}
+/* Toolbar and betting HUD participate in normal flow; no viewport offsets. */
+.room-environment.playing .emote-controls{position:static;order:1;display:flex;justify-content:flex-end;align-items:center;gap:6px;margin:0;padding:0 4px;min-height:34px}
+.room-environment .emote-controls button{font-size:19px;padding:3px 7px;min-height:32px;line-height:1.2}
+.room-environment.playing .action-panel{order:2;width:100%;max-width:none;margin:0;min-height:80px;padding:12px 16px;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.room-environment .action-status{flex:1 1 230px;min-width:0}.room-environment .action-status strong{max-width:none;font-size:13px;overflow-wrap:anywhere}.room-environment .action-status div>span{font-size:12px;line-height:1.4;color:#c4d1bb}.room-environment .betting-controls{flex:0 1 auto;width:auto;display:flex;gap:12px;align-items:flex-end;justify-content:flex-end;flex-wrap:wrap}
+.room-environment .quick-actions,.room-environment .between-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.room-environment .raise-controls{display:grid;grid-template-columns:90px auto;gap:4px 10px;align-items:end;width:auto;min-width:0}
+.room-environment .raise-label{grid-column:1/-1;font-size:11px;color:#e0d4b6;line-height:1.2}
+.room-environment .raise-controls input{width:90px;height:44px;padding:8px 10px;border:1px solid #bfa66c;border-radius:8px;box-shadow:inset 0 2px 5px #0007;background:#0c1b15;color:#ffe9b6;font-size:15px;font-variant-numeric:tabular-nums}
+.room-environment .primary-btn,.room-environment .secondary-btn,.room-environment .fold-btn,.room-environment .allin-btn,.room-environment .raise-controls .primary-btn{min-height:44px;border-radius:8px;font-size:13px;line-height:1.25;padding:10px 15px;white-space:nowrap;flex:none}
+.room-environment button:focus-visible,.room-environment input:focus-visible,.room-environment a:focus-visible{outline:3px solid #ffe3a4;outline-offset:3px}
+.room-environment button:disabled{opacity:.55;filter:saturate(.35);box-shadow:none}.room-environment button:disabled:hover{filter:saturate(.35)}
+.room-environment .hud-room{min-width:0}.room-environment .hud-room small{font-size:10px;letter-spacing:1px}.room-environment .topbar-right{flex:none;gap:8px}.room-environment .connection{font-size:11px}
+.room-environment.log-open .right-panel{top:80px;bottom:auto;max-height:calc(100svh - 100px);margin:0;overflow:auto;overscroll-behavior:contain}
+.room-environment .emote-bubble{top:0;right:calc(100% + 8px);font-size:27px}
+@media(max-height:800px){.room-environment.playing .main-shell{padding:8px 14px;gap:6px}.room-environment.playing .topbar{height:48px}.room-environment.playing main{gap:5px}.room-environment.playing .table-scene{width:min(100%,calc((100svh - 214px)*1.85))}.room-environment .seat{gap:3px}.room-environment .seat-person{padding:5px;gap:5px}.room-environment .seat-info strong{font-size:12px}.room-environment .seat-info>span{font-size:12px}.room-environment.playing .action-panel{min-height:72px;padding:9px 12px}}
+@media(max-width:1100px){.room-environment .hud-brand strong{letter-spacing:1px;font-size:11px}.room-environment .connection{display:none}.room-environment .seat-info strong{font-size:12px}.room-environment .action-status{flex-basis:170px}.room-environment .betting-controls{gap:8px}.room-environment .primary-btn,.room-environment .secondary-btn,.room-environment .fold-btn,.room-environment .allin-btn,.room-environment .raise-controls .primary-btn{padding-inline:12px}}
+@media(max-width:900px){.room-environment.playing .action-panel{display:grid;grid-template-columns:1fr}.room-environment .action-status strong{font-size:12px}.room-environment .action-status .status-orb{display:none}.room-environment .action-status div>span{font-size:11px}.room-environment .betting-controls{width:100%;justify-content:space-between}.room-environment .raise-controls{grid-template-columns:82px auto}.room-environment .raise-controls input{width:82px}.room-environment.playing .table-scene{width:min(100%,calc((100svh - 267px)*1.85))}.room-environment .seat{--seat-width:114px}.room-environment .seat-avatar{width:30px}.room-environment .seat-info strong{font-size:11px}.room-environment .seat-info>span{font-size:12px}.room-environment .turn-timer{width:21px;height:21px;font-size:10px}.room-environment .seat-action{font-size:11px}.room-environment .felt-brand{display:none}.room-environment .seat-bet{font-size:11px}.room-environment .hud-room small{font-size:9px}.room-environment .hud-room{font-size:11px}}
+@media(max-width:600px){.room-environment.playing .main-shell{height:auto;min-height:100svh;display:flex;flex-direction:column;padding:8px}.room-environment.playing main{display:flex;flex-direction:column;gap:10px;min-height:0}.room-environment.playing .topbar{height:50px;flex:none;padding:0 6px;gap:6px}.room-environment .hud-brand{font-size:19px}.room-environment .hud-brand strong{display:none}.room-environment .topbar-right{gap:0}.room-environment .icon-btn{padding:7px}.room-environment.playing .game-grid{display:flex;flex:none;min-height:360px}.room-environment.playing .table-scene{width:100%;aspect-ratio:1;min-height:360px}.room-environment .poker-table{inset:18% 7%;border-radius:43% / 33%}.room-environment .seat{--seat-width:106px;gap:4px}.room-environment .seat.seat-1,.room-environment .seat.seat-2{left:0}.room-environment .seat.seat-4,.room-environment .seat.seat-5{right:0}.room-environment .seat-person{grid-template-columns:25px minmax(0,1fr);gap:4px;padding:5px}.room-environment .seat-avatar{width:25px}.room-environment .turn-timer{position:absolute;top:0;right:0;transform:translate(30%,-60%)}.room-environment .seat-info strong{font-size:11px}.room-environment .seat-info>span{font-size:11px}.room-environment .seat-info strong small{font-size:9px}.room-environment .seat-bet{font-size:10px;padding:3px 4px;gap:3px}.room-environment .bet-chip{width:13px}.room-environment .seat-1 .seat-bet,.room-environment .seat-2 .seat-bet{left:calc(100% + 3px)}.room-environment .seat-4 .seat-bet,.room-environment .seat-5 .seat-bet{right:calc(100% + 3px)}.room-environment .seat-0 .seat-bet,.room-environment .seat-3 .seat-bet{left:calc(100% + 3px)}.room-environment .seat-markers{gap:2px}.room-environment .dealer-button{width:19px;height:19px;font-size:10px}.room-environment .blind-marker{font-size:9px}.room-environment .community{gap:7px}.room-environment .street-label{font-size:10px}.room-environment .playing-card{width:34px}.room-environment .pot>span:last-child{font-size:10px}.room-environment .pot strong{font-size:17px}.room-environment.playing .action-panel{gap:10px;padding:12px}.room-environment .betting-controls{display:grid;grid-template-columns:1fr;gap:10px}.room-environment .quick-actions{justify-content:stretch;flex-wrap:nowrap}.room-environment .quick-actions button{flex:1;padding-inline:8px}.room-environment .raise-controls{grid-template-columns:minmax(80px,1fr) minmax(0,1.5fr);gap:5px 10px;width:100%}.room-environment .raise-controls input{width:100%}.room-environment .raise-controls .primary-btn{width:100%}.room-environment.playing .emote-controls{min-height:36px}.room-environment.log-open .right-panel{right:8px;top:70px;width:min(320px,calc(100vw - 16px));max-height:calc(100svh - 85px)}}
+@media(min-width:601px) and (max-height:650px){
+ .room-environment.playing .table-scene{width:min(100cqw,280cqh);aspect-ratio:2.8}
+ .room-environment .community{top:45%;transform:translate(-50%,-50%)}
+ .room-environment .pot>span:last-child{flex-direction:row;align-items:center;gap:6px}
+ .room-environment .physical-pot{height:22px}
+ .room-environment .playing-card{width:35px}.room-environment .playing-card.small{width:26px}
+ .room-environment .seat.seat-0 .seat-cards,.room-environment .seat.seat-3 .seat-cards{width:60px}
+ .room-environment .seat.vacant{display:flex;width:52px}
+ .room-environment .empty-seat{width:32px;height:32px}.room-environment .vacant>span{font-size:10px}
+ .room-environment .seat.seat-1,.room-environment .seat.seat-2,.room-environment .seat.seat-4,.room-environment .seat.seat-5{width:calc(var(--seat-width) + 66px);grid-template-columns:var(--seat-width) 60px;gap:3px 6px}
+ .room-environment .seat-1 .seat-person,.room-environment .seat-2 .seat-person{grid-column:1;grid-row:1}
+ .room-environment .seat-1 .seat-cards,.room-environment .seat-2 .seat-cards{grid-column:2;grid-row:1}
+ .room-environment .seat-1 .seat-action,.room-environment .seat-2 .seat-action{grid-column:1;grid-row:2}
+ .room-environment .seat-4 .seat-person,.room-environment .seat-5 .seat-person{grid-column:2;grid-row:1;width:var(--seat-width)}
+ .room-environment .seat.seat-4,.room-environment .seat.seat-5{grid-template-columns:60px var(--seat-width)}
+ .room-environment .seat-4 .seat-cards,.room-environment .seat-5 .seat-cards{grid-column:1;grid-row:1}
+ .room-environment .seat-4 .seat-action,.room-environment .seat-5 .seat-action{grid-column:2;grid-row:2}
+ .room-environment .seat-1 .seat-bet,.room-environment .seat-2 .seat-bet{left:calc(var(--seat-width) + 6px);top:calc(100% + 3px)}
+ .room-environment .seat-4 .seat-bet,.room-environment .seat-5 .seat-bet{right:calc(var(--seat-width) + 6px);top:calc(100% + 3px)}
+ .room-environment .seat.seat-0,.room-environment .seat.seat-3{width:calc(var(--seat-width) + 70px);grid-template-columns:64px var(--seat-width);gap:4px 6px}
+ .room-environment .seat-0 .seat-cards,.room-environment .seat-3 .seat-cards{grid-column:1;grid-row:1}
+ .room-environment .seat-0 .seat-person,.room-environment .seat-3 .seat-person{grid-column:2;grid-row:1}
+ .room-environment .seat-0 .seat-action,.room-environment .seat-3 .seat-action{grid-column:2;grid-row:2}
+ .room-environment .seat-0 .seat-markers,.room-environment .seat-3 .seat-markers{right:auto;left:100%;top:0}
+ .room-environment .seat-0 .seat-bet,.room-environment .seat-3 .seat-bet{left:auto;right:100%;top:0;bottom:auto}
+ .room-environment .community{gap:5px}.room-environment .street-label{font-size:10px}
+ .room-environment .seat-0 .turn-timer,.room-environment .seat-3 .turn-timer{right:-26px;top:26px;bottom:auto}
+}
+@media(prefers-reduced-motion:reduce){.room-environment *{animation:none!important;transition:none!important}}
+
+/* Reactions share the status row, with a separate cell from betting controls. */
+.room-environment.playing .action-panel{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px}
+.room-environment.playing .action-status{grid-column:1;grid-row:1}
+.room-environment.playing .action-panel .emote-controls{grid-column:2;grid-row:1;min-height:32px;justify-content:flex-end;padding:0}
+.room-environment.playing .betting-controls,.room-environment.playing .between-actions{grid-column:1/-1;grid-row:2;justify-content:flex-end;width:100%}
+.room-environment .action-error{grid-column:1/-1}
+@media(min-width:1101px){.room-environment.playing .action-panel{grid-template-columns:minmax(230px,1fr) auto auto}.room-environment.playing .betting-controls,.room-environment.playing .between-actions{grid-column:3;grid-row:1}.room-environment.playing .action-panel .emote-controls{grid-column:2;grid-row:1}}
+@media(max-width:600px){.room-environment.playing main{height:auto}.room-environment.playing .action-panel{grid-template-columns:minmax(0,1fr)}.room-environment.playing .action-panel .emote-controls{grid-column:1;grid-row:2}.room-environment.playing .betting-controls,.room-environment.playing .between-actions{grid-row:3}.room-environment.playing .action-status{grid-column:1}}
+
+@media(max-width:600px){.room-environment .community{top:45%;transform:translate(-50%,-50%);gap:5px}.room-environment .board{gap:4px}.room-environment .playing-card{width:32px}.room-environment .pot>span:last-child{flex-direction:row;gap:6px}.room-environment .physical-pot{height:22px}}
+
+@media(max-width:600px){
+ .room-environment .playing-card{width:clamp(24px,7cqw,30px)}
+ .room-environment .board{gap:3px}
+ .room-environment .card-rank{font-size:13px}.room-environment .card-suit{font-size:18px}
+ .room-environment .physical-pot{gap:2px}.room-environment .chip-tower,.room-environment .chip-tower i{width:18px}
+ .room-environment .chip-tower:nth-child(n+3){display:none}
+ .room-environment .pot{gap:6px}
+ .room-environment .seat-1 .seat-bet,.room-environment .seat-2 .seat-bet{left:0;right:auto;top:auto;bottom:calc(100% + 3px)}
+ .room-environment .seat-4 .seat-bet,.room-environment .seat-5 .seat-bet{right:0;left:auto;top:auto;bottom:calc(100% + 3px)}
+}
