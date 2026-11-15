@@ -1,0 +1,106 @@
+/* Riverroom: printed pieces, walnut joinery, a quiet club ledger.
+   Geometry remains owned by table-layout.css. These are material treatments. */
+.room-environment{--club-ivory:#e5dfce;--club-muted:#b4b6a5;--club-brass:#b3a078;--club-walnut:#29221d;--green:#a99a76;--ink:var(--club-ivory);color:var(--club-ivory);font-family:'DM Sans',sans-serif;background-color:#241f1b;background-image:repeating-linear-gradient(1deg,#ffffff01 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,transparent 0 199px,#09070535 199px 201px,transparent 201px 400px)}
+.room-environment:before{background:radial-gradient(ellipse at 50% 40%,transparent 30%,#100e0b65 100%)}
+.room-environment .topbar,.room-environment.playing .topbar{border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;min-height:48px;padding-inline:8px}
+.room-environment .hud-brand{gap:9px;color:#dcd4be;align-items:center}
+.room-environment .hud-brand>svg{width:32px;height:32px;color:#ad9e7b;flex:none}
+.room-environment .hud-brand strong{font-family:Georgia,'Times New Roman',serif;font-size:25px;font-weight:400;letter-spacing:-.9px;line-height:1}
+.room-environment .hud-brand strong span{display:block;font-family:'DM Sans',sans-serif;font-size:8px;letter-spacing:3px;margin-top:5px;color:#a49d8c}
+.room-environment .hud-room{font-size:11px;font-weight:400;letter-spacing:.5px;color:#d5d0bf;font-variant-numeric:tabular-nums}
+.room-environment .hud-room small{font-size:9px;letter-spacing:.7px;color:#aaa996}
+.room-environment .topbar-right{gap:3px}.room-environment .connection{font-size:10px;color:#acae9d}.room-environment .connection i{width:4px;height:4px;box-shadow:none;background:#8d9d80}
+.room-environment .icon-btn{color:#bbb9a7;border-radius:3px;padding:9px}.room-environment .icon-btn:hover{background:#ffffff06;color:#f3e9cd}
+.room-environment .poker-table{background:#244c3e;border-color:#67513b;border-style:solid;box-shadow:0 0 0 2px #917b56,0 0 0 7px #36291f,inset 0 0 0 3px #19382d,inset 0 0 35px #0b261c35,0 12px 0 #1b1712,0 21px 28px #0005}
+.room-environment .poker-table:after{opacity:.2;mix-blend-mode:soft-light}
+.room-environment .felt-inner{border:1px dashed #c6ccaa29;inset:14px}
+.room-environment .community{gap:clamp(6px,1cqw,12px)}
+.room-environment .street-label{font-size:11px;color:#bccbb9;letter-spacing:1.5px;font-weight:400;text-transform:uppercase}
+.room-environment .playing-card{background:#eee9d9;color:#294338;border-color:#e1dac5;border-radius:3px;box-shadow:1px 2px 0 #d2c8ae,2px 5px 7px #071a164a}
+.room-environment .playing-card.red{color:#a15e49}
+.room-environment .card-rank,.room-environment .card-corner{font-family:Georgia,'Times New Roman',serif}
+.room-environment .playing-card.empty{background:none;border:0;box-shadow:none;animation:none}
+.room-environment .card-back{background-color:#294a44;background-image:repeating-linear-gradient(0deg,#e2dcc212 0 1px,transparent 1px 5px);border:2px solid #d8d0b8;border-radius:3px;padding:4px}
+.room-environment .card-back>svg{width:100%;height:100%;color:#d6cfb6;display:block}
+.room-environment .seat-person{border:0;border-radius:0;background:none;box-shadow:none;padding:7px 3px;position:relative}
+.room-environment .seat-person:after{content:"";position:absolute;width:1px;height:13px;background:#98866670;pointer-events:none}
+.room-environment .seat-0 .seat-person:after{left:50%;bottom:100%}.room-environment .seat-3 .seat-person:after{left:50%;top:100%}
+.room-environment .seat-1 .seat-person:after,.room-environment .seat-2 .seat-person:after{left:100%;top:50%;width:13px;height:1px}
+.room-environment .seat-4 .seat-person:after,.room-environment .seat-5 .seat-person:after{right:100%;top:50%;width:13px;height:1px}
+.room-environment .seat-info strong{font-size:13px;line-height:1.35;font-weight:500;color:#e9e4d5;text-shadow:0 1px 1px #19150e}
+.room-environment .seat-info strong small{border:0;border-radius:0;background:none;font-size:10px;font-weight:400;color:#c0c5ad;letter-spacing:.3px;padding:0 0 0 4px}
+.room-environment .seat-info>.station-balance{font-size:13px;line-height:1.45;font-weight:400;letter-spacing:.3px;font-variant-numeric:tabular-nums;color:#cbc4ad}
+.room-environment .seat-avatar{border:1px solid #a59b804d;box-shadow:0 2px 0 #121c16;background:#455348;filter:saturate(.65);border-radius:50%}
+.room-environment .illustrated-avatar{border-radius:50%}
+.room-environment .on-turn .seat-person{background:none;border:0;box-shadow:none}
+.room-environment .on-turn .seat-avatar{border:1px solid #c4ad70;box-shadow:0 0 0 2px #c4ad7026;animation:none}
+.room-environment .on-turn .seat-info strong{color:#f2dfac}
+.room-environment .seat-action{background:none;border:0;box-shadow:none;border-radius:0;font-size:11px;font-weight:400;font-style:italic;line-height:1.35;color:#bac3b0;padding:2px 0;text-shadow:0 1px 2px #091a11}
+.room-environment .seat-action.won{background:none;color:#dfcf9e;letter-spacing:.8px;font-size:10px;font-style:normal;font-weight:600}
+.room-environment .on-turn .seat-action{color:#d9c493}
+.room-environment .winner .seat-avatar{box-shadow:0 0 0 1px #c7b68275}
+.room-environment .folded .seat-person{opacity:.72}.room-environment .folded .seat-cards{opacity:.42}
+.room-environment .turn-timer{border:0;background:none;color:#d7c697;box-shadow:none;font-size:11px;font-variant-numeric:tabular-nums;border-radius:0}
+.room-environment .seat-bet{border:0;border-radius:0;background:none;box-shadow:none;padding:4px;color:#e3dfcb;font-size:12px;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px #0b2116}
+.room-environment .dealer-button{background:#e2dcc8;color:#42392b;border:1px solid #a89d81;box-shadow:0 1px 1px #0005;font-family:Georgia,serif;font-weight:700}
+.room-environment .blind-marker{background:none;border:0;border-radius:0;color:#c5bda2;padding:3px 1px;font-size:10px;letter-spacing:.6px}
+.room-environment .pot{animation:none;gap:10px}
+.room-environment .pot>span:last-child{font-size:10px;color:#bfcbb6;letter-spacing:1px}
+.room-environment .pot strong{font-family:Georgia,'Times New Roman',serif;font-size:clamp(19px,2cqw,27px);font-weight:400;letter-spacing:.4px;color:#e4d6b3;line-height:1.15}
+.room-environment .chip-tower i,.room-environment .bet-chip,.room-environment .flying-chip{background:#ada58a;border-color:#e4dfcb;box-shadow:0 2px 0 #55543d;border-width:2px}
+.room-environment .chip-tower i:after{content:"";position:absolute;inset:1px 4px;border:1px solid #756e52;border-radius:50%}
+.room-environment .tower-1 i,.room-environment .tower-4 i{background:#965e4b;border-color:#d4bba2;box-shadow:0 2px 0 #573b2a}
+.room-environment .tower-2 i{background:#587766;border-color:#c0cbb5;box-shadow:0 2px 0 #344b3c}
+.room-environment .empty-seat{border:0;border-radius:0;box-shadow:none;background:none;width:36px;height:30px;color:#a59d83}
+.room-environment .empty-seat>span{font-size:12px;font-family:Georgia,serif;border-bottom:1px solid #96846755;padding-bottom:4px}
+.room-environment .vacant>span{background:none;color:#aaa58f;font-size:10px;letter-spacing:.5px}
+/* A betting strip, not another room-sized panel. Only controls have surfaces. */
+.room-environment.playing .action-panel{background:none;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;min-height:64px;padding:9px 4px 7px;column-gap:20px;row-gap:8px;position:relative}
+.room-environment .action-status strong{font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:400;color:#e4d9bf;line-height:1.25}
+.room-environment .action-status div>span{font-size:11px;line-height:1.5;color:#abae9b}
+.room-environment .primary-btn,.room-environment .secondary-btn,.room-environment .fold-btn,.room-environment .allin-btn,.room-environment .raise-controls .primary-btn{border-radius:3px;min-height:42px;padding:10px 17px;font-size:13px;font-weight:500;letter-spacing:.2px;line-height:1.3;border:0;box-shadow:0 3px 0 #151812;transition:background 150ms,transform 150ms,box-shadow 150ms}
+.room-environment .primary-btn,.room-environment .raise-controls .primary-btn{background:#b2a17c;color:#1f2920;box-shadow:0 3px 0 #6a6047}
+.room-environment .secondary-btn{background:#e1dbc9;color:#233e30;box-shadow:0 3px 0 #9b967e}
+.room-environment .fold-btn{background:#56473c;color:#e1d7c2;box-shadow:0 3px 0 #2d251e}
+.room-environment .allin-btn{background:#38473b;color:#d7d8c1;box-shadow:0 3px 0 #19281f}
+.room-environment button:hover:not(:disabled){filter:none}.room-environment .primary-btn:hover:not(:disabled){background:#c4b58f}.room-environment .secondary-btn:hover:not(:disabled){background:#f0ead8}.room-environment .fold-btn:hover:not(:disabled){background:#675446}.room-environment .allin-btn:hover:not(:disabled){background:#46594a}
+.room-environment .primary-btn:active:not(:disabled),.room-environment .secondary-btn:active:not(:disabled),.room-environment .fold-btn:active:not(:disabled),.room-environment .allin-btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 #181c12}
+.room-environment .raise-label{font-size:10px;letter-spacing:.4px;color:#bbb9a0}
+.room-environment .raise-controls input{height:42px;border-radius:2px;background:#181e17;border:1px solid #93896a66;box-shadow:inset 0 1px 2px #0005;color:#e4dfcc;font-size:14px}
+.room-environment button:focus-visible,.room-environment input:focus-visible,.room-environment a:focus-visible{outline:2px solid #e5d3a4;outline-offset:4px}
+.room-environment button:disabled{opacity:.45;box-shadow:none;filter:grayscale(.4)}
+/* The emote menu is keyboard reachable, dismisses on Escape and outside click. */
+.room-environment.playing .action-panel .emote-controls{position:relative;inset:auto;min-height:32px;display:block}
+.room-environment .emote-controls .emote-trigger{display:flex;align-items:center;gap:6px;border:0;background:none;box-shadow:none;border-radius:2px;font-size:11px;line-height:1.3;color:#b9b9a3;padding:8px 4px;min-height:36px}
+.room-environment .emote-trigger:hover{color:#ece1c7;background:#ffffff05}
+.emote-options{position:absolute;bottom:calc(100% + 9px);right:0;width:174px;background:#e1dac5;color:#29382c;padding:5px;box-shadow:2px 5px 12px #0005;z-index:25}
+.room-environment .emote-options button{display:block;background:none;border:0;border-radius:0;box-shadow:none;color:#344536;text-align:left;font-size:12px;padding:10px 12px;width:100%;min-height:38px;line-height:1.3}
+.room-environment .emote-options button:hover{background:#c7c5ac}.room-environment .emote-options button:focus-visible{outline-color:#526549;outline-offset:-2px}
+.room-environment .emote-bubble{background:#e5decb;color:#344437;font-family:Georgia,serif;font-style:italic;font-size:14px;line-height:1.4;max-width:145px;width:max-content;padding:7px 11px;border:0;border-radius:1px;box-shadow:1px 3px 6px #0004;z-index:6}
+.room-environment .seat-1 .emote-bubble,.room-environment .seat-2 .emote-bubble{left:0;right:auto}
+.room-environment .seat-4 .emote-bubble,.room-environment .seat-5 .emote-bubble{right:0;left:auto}
+/* Reservation and history are paper artifacts, rather than dashboard cards. */
+.room-environment .lobby-card,.room-environment .rules-modal{background:#dfd8c4;color:#2d3d30;border:0;border-radius:2px;box-shadow:0 1px 0 #b0a88e,0 14px 34px #0005;padding:30px}
+.room-environment .lobby-card h2,.room-environment .rules-modal h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:31px;letter-spacing:-.7px;color:#2e4434}
+.room-environment .lobby-card p,.room-environment .rules-modal p,.room-environment .rules-modal li{color:#606950;font-size:12px}
+.room-environment .lobby-card .panel-overline{color:#74795e;font-size:9px;letter-spacing:1.2px}
+.room-environment .mode-tabs{background:none;border-radius:0;padding:0;border-bottom:1px solid #adaf9670;gap:18px}
+.room-environment .mode-tabs button{border-radius:0;padding:11px 0;color:#767c60;flex:none;font-size:12px}
+.room-environment .mode-tabs button.selected{background:none;box-shadow:inset 0 -2px #496346;color:#334b35;font-weight:600}
+.room-environment form label{font-size:11px;color:#505f46}.room-environment form input{background:#f0eadb;border:1px solid #bcb89d;border-radius:2px;color:#2d4331;box-shadow:none;font-size:13px}.room-environment input::placeholder{color:#93947b}
+.room-environment .lobby-card .primary-btn{background:#355440;color:#e8e2cd;box-shadow:0 3px 0 #1b3425}
+.room-environment .private-hint,.room-environment .practice-note{color:#72795d;font-size:10px}.room-environment .practice-divider{color:#8a8c71;margin-top:23px}.room-environment .practice-divider:before,.room-environment .practice-divider:after{background:#bbbca2}
+.room-environment .practice-btn{background:none;border:0;box-shadow:none;border-radius:0;color:#3b573c;font-size:12px;font-weight:500;text-align:left;padding:7px 0;justify-content:space-between}
+.room-environment .practice-note{text-align:left}.room-environment .rules-modal li strong{color:#344f37}.room-environment .hand-rankings{background:#c8cbb0;border-radius:0}.room-environment .hand-rankings strong,.room-environment .hand-rankings p{color:#4a6042}
+.room-environment.log-open .right-panel{background:#ddd6c2;border:0;border-radius:2px;box-shadow:0 10px 25px #0005;backdrop-filter:none;color:#354332}
+.room-environment .room-info{padding:4px 8px 14px;border-bottom:1px solid #a8ac9180}.room-environment .room-info h2{font-family:Georgia,serif;font-weight:400;font-size:25px;color:#324d37;margin:8px 0}.room-environment .room-info p,.room-environment .room-info .panel-overline{color:#72795d}
+.room-environment .room-info .hand-meta{border-color:#b9bca180;color:#737e60}.room-environment .hand-meta strong{color:#3f5941}.room-environment .invite-btn{background:#c9cbb3;border:0;border-radius:2px;color:#36513a}
+.room-environment .feed-card h3{color:#465e41;border-color:#b9bda1;font-size:12px}.room-environment .feed-card h3>span{display:none}.room-environment .feed-entry p{color:#657357;font-size:11px}.room-environment .feed-entry.latest p{color:#314f35}.room-environment .feed-entry:before{border-color:#b5bc9c}.room-environment .feed-entry i{background:#9cae89}.room-environment .leave-btn{color:#745b43;font-size:11px}.room-environment .log-close{color:#58674c}
+.room-environment .sidebar.mobile-open{border:0;border-radius:2px;background:#ddd6c2;color:#354c35;backdrop-filter:none;box-shadow:0 8px 24px #0005}.room-environment .sidebar .brand{font-family:Georgia,serif;color:#3d553c;font-weight:400}.room-environment .sidebar .brand small{display:none}.room-environment .sidebar .brand-mark{display:none}.room-environment .nav-item{color:#435d3d;border-radius:0;font-size:12px}.room-environment .nav-item:hover{background:#c5cbb0}
+.room-environment .toast{border:0;border-radius:2px;background:#ded7c3;color:#334c36;font-size:12px;box-shadow:0 4px 12px #0004}
+.room-environment .sidebar .brand>svg{width:28px;height:28px;flex:none;color:#7c795b}
+.room-environment :is(.lobby-card,.rules-modal,.right-panel,.sidebar) :is(button,input,a):focus-visible{outline-color:#405d40}
+@media(max-width:1100px){.room-environment .hud-brand strong{font-size:23px}.room-environment .seat-info strong,.room-environment .seat-info>.station-balance{font-size:12px}.room-environment .hud-brand strong span{font-size:7px;letter-spacing:2px}}
+@media(max-width:900px){.room-environment .seat-info strong,.room-environment .seat-info>.station-balance{font-size:11px}.room-environment.playing .action-panel{padding:7px 4px;min-height:60px}.room-environment .action-status strong{font-size:15px}.room-environment .action-status div>span{font-size:11px}}
+@media(max-width:600px){.room-environment .hud-brand>svg{width:25px;height:25px}.room-environment .hud-brand strong{display:none}.room-environment .hud-room{font-size:10px}.room-environment .hud-room small{font-size:9px}.room-environment .topbar-right{gap:0}.room-environment.playing .action-panel{grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:10px 4px}.room-environment.playing .action-panel .emote-controls{grid-column:2;grid-row:1}.room-environment.playing .betting-controls,.room-environment.playing .between-actions{grid-column:1/-1;grid-row:2}.room-environment .action-status strong{font-size:15px}.room-environment .action-status div>span{font-size:10px}.room-environment .primary-btn,.room-environment .secondary-btn,.room-environment .fold-btn,.room-environment .allin-btn,.room-environment .raise-controls .primary-btn{font-size:12px;min-height:44px;padding:10px 12px}.room-environment .raise-controls input{height:44px}.room-environment .lobby-card{padding:25px}.room-environment .lobby-card h2{font-size:28px}.room-environment .seat-person{padding:5px 1px}.room-environment .seat-info strong small{font-size:9px}.room-environment .seat-action{font-size:10px}.room-environment .emote-bubble{font-size:12px;max-width:100px}.room-environment .emote-controls .emote-trigger{font-size:10px}.room-environment .pot strong{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.room-environment *{animation:none!important;transition:none!important}}
