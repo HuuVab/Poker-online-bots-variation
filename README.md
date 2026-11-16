@@ -1,41 +1,41 @@
 # Riverroom
 
-An invitation-only, play-money Texas Hold’em club with 2–6-player cash tables, isolated bot practice, and tournaments for up to 27 players across three nine-seat tables.
+An invitation-only, ticket-entry Texas Hold’em club with 2–6-player regular tables, isolated bot practice, and tournaments for up to 27 players across three nine-seat tables.
 
 ## Club setup
 
 The production `CLUB_OWNER_EMAIL` runtime secret selects the only account allowed to initialize the club. Sign in with ChatGPT and choose **Open private club**. The owner identity is then pinned to the verified Site user ID. An unset owner configuration fails closed; the first visitor cannot claim ownership.
 
-Wallets start at zero. In **Members**, invite an email as Member or Host, then issue play chips with an audit reason. Invitations expire after seven days and must be accepted by the matching signed-in email. Hosts create/manage their own tables; the owner can manage all tables, change roles, suspend or remove memberships. Suspending/removing preserves balances and queues any seated stack for settlement and cash-out.
+Tickets and points start at zero. In **Members → Grant mode tickets**, the owner selects Regular or Tournament, a member, a whole-ticket quantity, and an audit reason. Invitations expire after seven days and must be accepted by the matching signed-in email. Hosts create/manage their own tables; only the owner grants tickets. Suspending/removing preserves ticket and point balances and queues regular seats for settlement and chip retirement. There is no player wallet, payment integration, cash-out, resource transfer or points-to-entry conversion.
 
 Site audience permissions are a separate gate. This deployment remains owner-private: grant friends access in Site sharing settings as well as inviting them inside the club. Club invitations create database invitations only; they do not send email or change Site access.
 
 ## Playing and managing tables
 
-- Hosts set a table name and minimum/maximum buy-in. Rules remain six seats, no-limit Hold’em, 10/20 blinds and 45-second turns.
-- Buy-ins and between-hand top-ups debit the permanent wallet. Only the owner can issue or correct chips, and a reason is mandatory.
+- Regular and Tournament tickets, points and gameplay chips are separate. Practice remains free and awards nothing.
+- Regular tables have six seats, 10/20 blinds and 45-second turns. One Regular ticket grants a fixed 2,000-chip seat. Between-hand rebuys require zero chips and one further Regular ticket; no top-ups.
+- After each regular hand, each player earns `max(0, ending stack − opening stack)` Regular points. Returned own bets are excluded. Losses do not deduct earned points. Points never buy entry or chips.
 - Lock blocks new seats. Pause blocks the next deal while the current hand finishes.
 - Removing a player queues departure after the hand and blocks rejoining that table. It never force-folds the player.
-- Closing a table finishes the current hand, then cashes out all remaining stacks exactly once.
-- Voluntary departure folds an actionable hand, but preserves an all-in player’s pot eligibility. Cash-out waits until settlement.
-- Practice chips and old anonymous demo-room chips never enter club wallets. Funded tables do not expire after 24 hours.
-- **Club & wallet** returns to the club without abandoning a seat. **Leave & cash out** requests departure.
+- Closing or leaving a table retires remaining chips after settlement. No ticket or chip redemption occurs, even before the first deal.
+- Voluntary departure folds an actionable hand, but preserves an all-in player’s pot eligibility.
+- **Club & tickets** returns without abandoning a seat. **Leave table** requests departure.
 
-Chips have no cash value. No payments or real-money wagering are implemented.
+Tickets, points and gameplay chips have no cash value. See [docs/TICKETS-AND-POINTS.md](docs/TICKETS-AND-POINTS.md) for accounting, upgrade behavior and the future payment boundary.
 
 ## Tournament mode
 
-Open **Tournaments** in the club book. Hosts create events with an entry/rebuy cost (default 1,000 wallet chips). Members register; the host starts with 2–27 entrants. Seats are randomly assigned across up to three nine-seat tables, which balance and merge automatically between hands. Existing cash/practice tables remain six-seat games.
+Open **Tournaments** in the club book. Hosts create events requiring one Tournament ticket per entry or eligible rebuy. Each entry adds a locked prize-point contribution (default 1,000 points). Members register; the host starts with 2–27 entrants. Seats are randomly assigned across up to three nine-seat tables, which balance and merge automatically between hands. Existing regular/practice tables remain six-seat games.
 
-- Each entry gives 5,000 tournament chips. These have no wallet redemption value.
+- Each entry gives 5,000 tournament chips. These stay inside the event and cannot be redeemed.
 - Levels last 15 minutes, starting at 25/50 with a one-BB big-blind ante. The blind is paid before the ante by a short-stacked BB. Antes do not count toward calls.
 - Turns last 20 seconds. Each entrant starts with two time cards adding 20 seconds each; one card per action, with no replenishment on rebuy.
-- Unlimited zero-stack rebuys through Level 6, at the original entry price. Decisions last 20 seconds. A Level 6 hand finishing past the clock cutoff retains its last rebuy decision.
+- Unlimited zero-stack rebuys through Level 6, using one Tournament ticket. Decisions last 20 seconds. A Level 6 hand finishing past the clock cutoff retains its last rebuy decision.
 - Stop new hands at the cutoff, resolve those hands and decisions, close rebuys, then take one 10-minute break. Resume automatically at Level 7 with rebuys permanently closed. No other scheduled breaks.
 - Players, remaining players, total entries, rebuys, tournament prize pool, and each hand’s pot are distinct displays.
-- Entry/rebuy costs enter an audited reserve. Completion awards wallet prizes once: 2–3 original players 100%; 4–9 70/30%; 10–18 50/30/20%; 19–27 40/30/20/10%. Rebuys increase the pool without changing the payout tier.
+- Entries/rebuys increase the point prize pool. Completion awards Tournament points once: 2–3 original players 100%; 4–9 70/30%; 10–18 50/30/20%; 19–27 40/30/20/10%. Rebuys increase the pool without changing the payout tier.
 - Same-hand equal-stack eliminations share affected prizes. Percentage rounding remainder goes to first place; tied-prize integer leftovers follow registration order.
-- Tournament stacks cannot use cash-table buy-in, top-up, cash-out, seat-move or host kick endpoints. Unregister/cancel before starting refunds entries. A running tournament cannot be cancelled by its host.
+- Tournament stacks cannot use regular-table entry, rebuy, leave, seat-move or host kick endpoints. Unregister/cancel before starting returns the matching entry ticket and removes its prize-point contribution. A running tournament cannot be cancelled by its host.
 - Unanimous remaining-player approval pauses between hands. Resume shifts clocks and deadlines. A club membership suspension/removal pauses the event for review instead of silently forfeiting that player’s stack.
 
 The server advances events on authenticated club/table polling. If anyone has the club or table open, all tournament tables progress. When every viewer disconnects, saved gameplay resumes on return; the wall-clock blind schedule still advances. This deployment does not install an unattended timer service. Real production multi-device and load testing remain separate from local SQLite and browser QA.
@@ -46,11 +46,11 @@ The full rules and schedule are also available in the lobby and tournament help 
 
 React/Vinext on a Cloudflare Worker with D1. `/api/table` obtains identity from the Sites verified authentication helper; no browser-supplied account ID, role, balance or old seat bearer token authenticates a player. The poker engine deals and settles on the server. Responses redact opponent hole cards, deck, account IDs and internal accounting state, including for table managers.
 
-One club aggregate is committed using a version compare-and-swap. Wallets, cash-table stacks and tournament prize reserves therefore share a concurrency boundary across tables. Tournament chip stacks have a separate conservation invariant. A transactional D1 batch writes the aggregate, append-only ledger/hand records and idempotency record together. Each insert is guarded by the successful CAS marker; failed races retry from fresh state, and SQL errors roll back the complete transaction. A chip-supply invariant checks every commit. Mutation request IDs prevent duplicate buy-ins, cash-outs and adjustments, and reject changed-payload replays. Same-origin checks, streaming 8 KiB request limits, strict whole-chip validation and per-account read/write rate limits are enforced.
+One club aggregate is committed using a version compare-and-swap. Mode-specific tickets, points, regular stacks and tournament prize reserves share a concurrency boundary across tables. Every resource change must match its mode/resource audit delta. Each regular table conserves chips issued = held stacks + live contributions + retired chips; tournament chips have their own conservation invariant. A transactional D1 batch writes the aggregate, append-only ledger/hand records and idempotency record together. Inserts are guarded by the successful CAS marker; failed races retry and SQL errors roll back the transaction. Request IDs prevent duplicate grants, entries, rebuys and point awards, rejecting changed-payload replays. Same-origin checks, streaming 8 KiB limits, whole-number validation and per-account rate limits remain enforced.
 
-The SQL ledger is append-only through the application (no update/delete endpoints); database administrators remain trusted. This is a small private-club architecture, not a claim of immunity to compromise or a real-money platform. A compromised owner account can issue chips. Collusion and multiple accounts are not detected. ChatGPT/Sites manages authentication; protect the owner account accordingly. Back up the D1 database using your hosting provider’s tools.
+The SQL ledger is append-only through the application (no update/delete endpoints); database administrators remain trusted. This is a small private-club architecture, not a claim of immunity to compromise or a real-money platform. A compromised owner account can grant tickets. Hosts choose the published tournament point contribution before registration. Collusion and multiple accounts are not detected. ChatGPT/Sites manages authentication; protect the owner account accordingly. Back up the D1 database using your hosting provider’s tools.
 
-Clients poll tables every 1.2 seconds and the club every 5 seconds. Turn deadlines advance on an authenticated poll, so an abandoned table resumes its expired turns when someone next opens the club. This implementation serializes club writes and caps open tables at 30 and members at 250; it is intended for friends, not high-volume public play. History responses show the latest 100 wallet ledger entries. The aggregate has a storage ceiling and preserves closed table identities for idempotent retries.
+Clients poll tables every 1.2 seconds and the club every 5 seconds. Turn deadlines advance on an authenticated poll, so an abandoned table resumes its expired turns when someone next opens the club. This implementation serializes club writes and caps open tables at 30 and members at 250; it is intended for friends, not high-volume public play. History responses show the latest 100 ticket/point ledger entries. The aggregate has a storage ceiling and preserves closed table identities for idempotent retries.
 
 ## Local development
 
@@ -59,6 +59,7 @@ Requires Node.js 24+ (tests use built-in SQLite).
 ```powershell
 npm ci
 npm run build
+# Upgrade an existing database: apply ONLY unapplied migrations; this release adds 0003_mode_resources.sql.
 # Fresh database: apply each migration once, in filename order.
 Get-ChildItem drizzle/*.sql | Sort-Object Name | ForEach-Object {
   node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file $_.FullName
@@ -76,7 +77,7 @@ npm run typecheck
 npm run build
 ```
 
-Tests cover poker evaluation, blind order, short all-ins, side pots, ties, 300 randomized hands, verified membership and roles, concurrent cross-table spending, idempotent retries, SQL rollback, wallet reconciliation, all-in departures, deferred closure, kick fairness, suspension, practice isolation, request bounds and rate limits.
+Tests cover poker evaluation, blind order, short all-ins, side pots, ties, 300 randomized hands, verified membership and roles, concurrent cross-table spending, idempotent retries, SQL rollback, mode-specific ticket/point reconciliation, all-in departures, deferred closure, kick fairness, suspension, practice isolation, request bounds and rate limits.
 
 ## Full test matrix
 

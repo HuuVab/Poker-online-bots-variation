@@ -22,6 +22,13 @@
       "when": 1794798770598,
       "tag": "0002_unique_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1794815615930,
+      "tag": "0003_mode_resources",
+      "breakpoints": true
     }
   ]
 }

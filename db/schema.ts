@@ -11,7 +11,7 @@ export const clubs = sqliteTable("clubs", {
  id: text("id").primaryKey(), state: text("state").notNull(), version: integer("version").notNull(), lastCommit: text("last_commit").notNull(), updatedAt: integer("updated_at").notNull(),
 });
 export const clubLedger = sqliteTable("club_ledger", {
- id:text("id").primaryKey(), memberId:text("member_id").notNull(), actorId:text("actor_id").notNull(), kind:text("kind").notNull(), tableCode:text("table_code"), walletDelta:integer("wallet_delta").notNull(), tableDelta:integer("table_delta").notNull(), walletAfter:integer("wallet_after").notNull(), stackAfter:integer("stack_after"), reason:text("reason").notNull(), createdAt:integer("created_at").notNull(),
+ id:text("id").primaryKey(), memberId:text("member_id").notNull(), actorId:text("actor_id").notNull(), kind:text("kind").notNull(), tableCode:text("table_code"), mode:text("mode"), resource:text("resource"), resourceDelta:integer("resource_delta"), resourceAfter:integer("resource_after"), walletDelta:integer("wallet_delta").notNull(), tableDelta:integer("table_delta").notNull(), walletAfter:integer("wallet_after").notNull(), stackAfter:integer("stack_after"), reason:text("reason").notNull(), createdAt:integer("created_at").notNull(),
 }, table=>[index("club_ledger_member_time").on(table.memberId,table.createdAt)]);
 export const clubHands = sqliteTable("club_hands", {
  id:text("id").primaryKey(), tableCode:text("table_code").notNull(), hand:integer("hand").notNull(), data:text("data").notNull(), createdAt:integer("created_at").notNull(),

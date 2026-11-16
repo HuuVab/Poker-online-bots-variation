@@ -6,7 +6,7 @@ Implemented private-club no-limit Hold’em tournament mode. All chips are play 
 
 - 2–27 original players; at most three tables of nine seats.
 - 5,000 tournament chips for each entry or rebuy.
-- Entry/rebuy cost chosen by host before registration opens: 1–1,000,000 whole wallet chips, default 1,000. No fee.
+- Entry and eligible rebuy each consume one Tournament ticket. The host locks a 1–1,000,000-point prize contribution per entry/rebuy (default 1,000) when opening registration. No fee or cash-out.
 - All levels last 15 minutes. Initial SB/BB/ante: 25/50/50. Full schedule lives in `lib/tournament-rules.mjs` and appears in the lobby. After the listed levels, the last pattern continues with alternating increases.
 - One full-BB ante is paid by the BB player, including heads-up. Pay the blind first if short. The ante is dead money and does not reduce the amount needed to call.
 - 20 seconds per action; two time cards per original entrant. Each adds 20 seconds, one per action, with no replenishment after rebuy or transfer. Requests must arrive before the server deadline.
@@ -15,7 +15,7 @@ Implemented private-club no-limit Hold’em tournament mode. All chips are play 
 
 ## Registration and reserve
 
-Registration is limited to active club members. Debit entry cost from the permanent wallet and credit the tournament reserve in the same D1 transaction. Duplicate registrations and capacity overflow do not debit chips. Unregistering before start refunds the entry and reduces entries/pool. Pre-start cancellation refunds all entries once. No late registration; no host cancellation after starting.
+Registration is limited to active club members. Consume one Tournament ticket and add the configured points to the tournament prize reserve in the same D1 transaction. Duplicate registrations and capacity overflow do not consume tickets. Unregistering before start returns the Tournament ticket and reduces entries/pool. Pre-start cancellation returns all entry tickets once. No late registration; no host cancellation after starting.
 
 The host must have at least two eligible entrants to start. Starting locks the original-player count and payout tier, shuffles seating using cryptographic randomness, and deals automatically. Existing cash and bot-practice tables remain separate six-seat modes.
 
@@ -64,7 +64,7 @@ Complete only after all hands settle, all rebuy decisions resolve, and one playi
 
 ## Permissions and pauses
 
-Hosts manage their own registrations and starts; the club owner may manage any registration/start. Hosts cannot kick a running entrant, change stacks, manually deal, cash out tournament chips, alter payouts or force a winner. Existing cash-table endpoints reject tournament stack operations.
+Hosts manage their own registrations and starts; the club owner may manage any registration/start. Hosts cannot kick a running entrant, change stacks, manually deal, cash out tournament chips, alter payouts or force a winner. Existing regular-table endpoints reject tournament stack operations.
 
 A social pause requires all remaining entrants to vote for it, then begins between hands. A participant or manager may resume. Server deadlines, level end, break end and rebuy windows shift by the pause duration. A membership review pauses the event and requires restoring active membership before resumption. All-in eligibility and balances remain preserved.
 
@@ -80,12 +80,12 @@ Operational bounds remain five live tournaments, 30 live club tables total, 250 
 
 ## Accounting invariants
 
-- Permanent wallets + live cash stacks/pots + tournament reserves = net issued wallet chips.
-- Each wallet equals its wallet-ledger total.
-- Active tournament reserve = prize pool; completed reserve + prizes = prize pool; cancelled reserve = zero after refunds.
-- Tournament stacks + tournament live contributions + tournament antes = tournament chips issued through entries and rebuys.
-- Tournament chips never enter the wallet supply calculation.
-- All chip values are nonnegative safe integers. The owner-grant ceiling cannot block a valid refund or earned prize credit; total-supply safety still applies.
+- Regular and Tournament ticket balances and point totals are independent nonnegative safe integers, reconciled with resource audit deltas on each commit.
+- Each entry/rebuy consumes one Tournament ticket. Only pre-start unregister/cancel returns a ticket. Tournament prizes credit Tournament points, never tickets or Regular points.
+- Active point reserve = prize pool; completed reserve + awarded points = prize pool; cancelled reserve = zero.
+- Tournament stacks + live contributions + antes = chips issued through entries and rebuys.
+- Point awards and ticket consumption share the aggregate CAS and transactional ledger boundary.
+- Legacy wallets are archived without conversion. See TICKETS-AND-POINTS.md for upgrade behavior.
 
 ## Validation
 
