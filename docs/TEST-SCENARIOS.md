@@ -252,3 +252,9 @@ Use a staging club and disposable play chips, three independent accounts (owner,
 4. Run the 4 resolutions × 3 real zoom settings, plus phone portrait/landscape and reduced motion.
 5. Rehearse a deployment/restart and backup/restore on a database copy.
 6. Run authorized load tests and record response/latency/conflict measurements before selecting a production capacity target.
+
+## Implemented tournament extension
+
+The tournament mode adds tests in `tests/tournament.test.mjs` and a rules specification in `docs/TOURNAMENT-RULES.md`. The suite now reports 110 passing tests (including parameterized subtests). These cover three nine-player tables, 27→18→9 transfers, dead BTN, BB ante priority and conservation, 20-second actions, two +20-second time cards, unlimited Level 1–6 rebuys, the Level 6 decision barrier, exactly one 10-minute break, Level 7 rebuy denial, reserved prize funds, tied placements and exactly-once payouts. A complete simulated 27-player event and 100 varied-stack nine-player all-in hands supplement the earlier random-game checks.
+
+Local browser QA verified tournament creation, entry debit, unregister refund, cancellation, one real time-card activation, the cutoff break screen and nine-seat layout. Measured 1920×1080, 1600×900, 1366×768, 1280×720, effective 854×480 and 390×844: no station overlaps or horizontal overflow. Compact desktop uses intentional vertical scrolling. This was viewport testing, not a new claim of actual browser-zoom coverage or independent multi-device authentication/load testing. Test accounts and fixtures existed only in local D1.

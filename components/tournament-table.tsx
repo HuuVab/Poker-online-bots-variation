@@ -1,0 +1,12 @@
+"use client";
+import type {Tournament} from './tournament-lobby';
+import {tournamentState} from './tournament-lobby';
+const fmt=(n:number)=>n.toLocaleString('en-US');
+export function TournamentHUD({tournament:t,elapsed}:{tournament:Tournament;elapsed:number}){
+ const target=t.state==='break'?t.breakUntil:t.nextLevelAt,s=Math.max(0,Math.ceil(((target||t.serverNow)-t.serverNow-elapsed)/1000)),clock=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+ return <section className="tournament-hud" aria-label="Tournament information"><div><strong>{t.title}</strong><span>{tournamentState(t)}{['running','break'].includes(t.state)?` · ${clock}`:''}</span></div><div><strong>{t.remaining} / {t.players} players</strong><span>{t.totalEntries} entries · {t.totalRebuys} rebuys</span></div><div className="hud-prize"><strong>{fmt(t.prizePool)}</strong><span>Total prize pool · wallet chips</span></div></section>;
+}
+export function TournamentBetweenHands({tournament:t,elapsed,busy,command}:{tournament:Tournament;elapsed:number;busy:boolean;command:(action:string,extra?:Record<string,unknown>)=>Promise<void>}){
+ const self=t.self,seconds=Math.max(0,Math.ceil(((self?.rebuyUntil||t.serverNow)-t.serverNow-elapsed)/1000));
+ return <div className="tournament-between" aria-label="Tournament actions">{self?.state==='rebuy'?<><span className="rebuy-countdown">{seconds}s to rebuy · {self.timeCards} time cards left</span><button className="primary-btn" disabled={busy||seconds<=0||!['running','closing_rebuys'].includes(t.state)} onClick={()=>command('tournament-rebuy',{tournamentId:t.id})}>Rebuy · {fmt(t.buyIn)}</button><button className="secondary-btn" disabled={busy} onClick={()=>command('tournament-decline',{tournamentId:t.id})}>Decline rebuy</button></>:<span>{t.state==='completed'?self?.place?`Finished #${self.place} · prize ${fmt(self.prize)}`:'Tournament complete':t.state==='break'?'Rebuys closed · play resumes automatically after the break':t.state==='paused'?t.pauseReason:t.state==='closing_rebuys'?'Waiting for Level 6 hands and final rebuy decisions':self?.state==='eliminated'?'Eliminated · watching the table':'Next hand deals automatically · balancing tables when needed'}</span>}{t.state==='paused'&&(t.canManage||self&&['playing','rebuy'].includes(self.state))&&<button className="secondary-btn" disabled={busy} onClick={()=>command('tournament-resume',{tournamentId:t.id})}>Resume</button>}</div>;
+}

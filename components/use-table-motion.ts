@@ -2,7 +2,7 @@
 import {useLayoutEffect,useRef,useState,type RefObject} from 'react';
 
 type MotionPlayer={id:string;seat:number;cards:string[];folded:boolean;total:number;bet:number;left:boolean;waiting:boolean};
-type MotionRoom={code:string;hand:number;stage:string;dealer:number;board:string[];turnId:string|null;players:MotionPlayer[];results:{id:string;amount:number}[]};
+type MotionRoom={code:string;hand:number;stage:string;dealer:number;buttonSeat?:number;handStartedAt?:number;serverNow?:number;board:string[];turnId:string|null;players:MotionPlayer[];results:{id:string;amount:number}[]};
 
 // Animate committed game events once; ordinary polling never replays a deal or payout.
 export function useTableMotion(sceneRef:RefObject<HTMLDivElement|null>,room:MotionRoom|null){
@@ -46,10 +46,12 @@ export function useTableMotion(sceneRef:RefObject<HTMLDivElement|null>,room:Moti
     a?.finished.then(()=>{chip.remove();particles.current.delete(chip);},()=>{chip.remove();particles.current.delete(chip);});
    }
   };
-  if(newHand){
+  const freshDeal=newHand&&room.stage==='preflop'&&room.handStartedAt!==undefined&&(room.serverNow??Date.now())-room.handStartedAt<1800;
+  if(freshDeal){
    if(timer.current)clearTimeout(timer.current);
    setDealing(!reduce&&room.stage!=='showdown');
-   const order=[...room.players.slice(room.dealer+1),...room.players.slice(0,room.dealer+1)].filter(p=>p.cards.length&&!p.waiting&&!p.left);
+   const dealerSeat=room.buttonSeat??room.players[room.dealer]?.seat??-1;
+   const order=room.players.filter(p=>p.cards.length&&!p.waiting&&!p.left).sort((a,b)=>((a.seat-dealerSeat+9)%9||9)-((b.seat-dealerSeat+9)%9||9));
    order.forEach((p,index)=>{
     const station=seat(p.id);station?.querySelectorAll<HTMLElement>('.seat-cards .playing-card').forEach((card,n)=>{
      const target=center(card),delay=(n*order.length+index)*75;
@@ -60,7 +62,7 @@ export function useTableMotion(sceneRef:RefObject<HTMLDivElement|null>,room:Moti
    const former=prior?.players[prior.dealer];const oldDealer=former?seat(former.id)?.querySelector<HTMLElement>('.seat-person'):null;
    if(dealer){const end=center(dealer),start=oldDealer?center(oldDealer):end;animate(dealer,[{transform:`translate(${start.x-end.x}px,${start.y-end.y}px) scale(.65) rotate(-90deg)`,opacity:.5},{offset:.8,transform:'translate(0,0) scale(1.2) rotate(8deg)',opacity:1},{transform:'translate(0,0) scale(1) rotate(0)',opacity:1}],{duration:650,fill:'backwards'});}
   }
-  const oldBoard=newHand?0:prior?.board.length??room.board.length;
+  const oldBoard=prior?(newHand?0:prior.board.length):room.board.length;
   if(room.board.length>oldBoard){
    scene.querySelectorAll<HTMLElement>('.board .playing-card').forEach((card,index)=>{
     if(index<oldBoard||index>=room.board.length)return;
@@ -71,7 +73,7 @@ export function useTableMotion(sceneRef:RefObject<HTMLDivElement|null>,room:Moti
    for(const p of room.players){
     const before=prior.players.find(q=>q.id===p.id),station=seat(p.id);if(!before||!station)continue;
     if(p.folded&&!before.folded){const cards=station.querySelector<HTMLElement>('.seat-cards');if(cards){const start=center(cards);animate(cards,[{opacity:1,transform:'translate(0,0) rotate(0)'},{opacity:0,transform:`translate(${(potPoint.x-start.x)*.75}px,${(potPoint.y-start.y)*.75}px) rotate(14deg) scale(.65)`}],{duration:460,easing:'ease-in'});}}
-    if(p.total>before.total)flyChips(station.querySelector<HTMLElement>('.seat-bet')||station,pot);
+    if(p.total>before.total)flyChips(station.querySelector<HTMLElement>('.wager-motion-source')||station.querySelector<HTMLElement>('.seat-bet')||station,pot);
     if(room.stage==='showdown'&&prior.stage!=='showdown'&&!p.folded&&before.cards.includes('??')&&!p.cards.includes('??'))station.querySelectorAll<HTMLElement>('.playing-card').forEach((card,index)=>animate(card,[{transform:'perspective(500px) rotateY(88deg)',opacity:.3},{transform:'perspective(500px) rotateY(0)',opacity:1}],{duration:450,delay:index*100}));
    }
   }

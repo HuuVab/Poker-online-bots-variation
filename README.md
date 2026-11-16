@@ -1,6 +1,6 @@
 # Riverroom
 
-An invitation-only, play-money Texas Hold’em club for 2–6 players per table, with isolated bot practice.
+An invitation-only, play-money Texas Hold’em club with 2–6-player cash tables, isolated bot practice, and tournaments for up to 27 players across three nine-seat tables.
 
 ## Club setup
 
@@ -23,11 +23,30 @@ Site audience permissions are a separate gate. This deployment remains owner-pri
 
 Chips have no cash value. No payments or real-money wagering are implemented.
 
+## Tournament mode
+
+Open **Tournaments** in the club book. Hosts create events with an entry/rebuy cost (default 1,000 wallet chips). Members register; the host starts with 2–27 entrants. Seats are randomly assigned across up to three nine-seat tables, which balance and merge automatically between hands. Existing cash/practice tables remain six-seat games.
+
+- Each entry gives 5,000 tournament chips. These have no wallet redemption value.
+- Levels last 15 minutes, starting at 25/50 with a one-BB big-blind ante. The blind is paid before the ante by a short-stacked BB. Antes do not count toward calls.
+- Turns last 20 seconds. Each entrant starts with two time cards adding 20 seconds each; one card per action, with no replenishment on rebuy.
+- Unlimited zero-stack rebuys through Level 6, at the original entry price. Decisions last 20 seconds. A Level 6 hand finishing past the clock cutoff retains its last rebuy decision.
+- Stop new hands at the cutoff, resolve those hands and decisions, close rebuys, then take one 10-minute break. Resume automatically at Level 7 with rebuys permanently closed. No other scheduled breaks.
+- Players, remaining players, total entries, rebuys, tournament prize pool, and each hand’s pot are distinct displays.
+- Entry/rebuy costs enter an audited reserve. Completion awards wallet prizes once: 2–3 original players 100%; 4–9 70/30%; 10–18 50/30/20%; 19–27 40/30/20/10%. Rebuys increase the pool without changing the payout tier.
+- Same-hand equal-stack eliminations share affected prizes. Percentage rounding remainder goes to first place; tied-prize integer leftovers follow registration order.
+- Tournament stacks cannot use cash-table buy-in, top-up, cash-out, seat-move or host kick endpoints. Unregister/cancel before starting refunds entries. A running tournament cannot be cancelled by its host.
+- Unanimous remaining-player approval pauses between hands. Resume shifts clocks and deadlines. A club membership suspension/removal pauses the event for review instead of silently forfeiting that player’s stack.
+
+The server advances events on authenticated club/table polling. If anyone has the club or table open, all tournament tables progress. When every viewer disconnects, saved gameplay resumes on return; the wall-clock blind schedule still advances. This deployment does not install an unattended timer service. Real production multi-device and load testing remain separate from local SQLite and browser QA.
+
+The full rules and schedule are also available in the lobby and tournament help dialog. See [docs/TOURNAMENT-RULES.md](docs/TOURNAMENT-RULES.md) for the state machine, accounting and validation details.
+
 ## Architecture and security boundaries
 
 React/Vinext on a Cloudflare Worker with D1. `/api/table` obtains identity from the Sites verified authentication helper; no browser-supplied account ID, role, balance or old seat bearer token authenticates a player. The poker engine deals and settles on the server. Responses redact opponent hole cards, deck, account IDs and internal accounting state, including for table managers.
 
-One club aggregate is committed using a version compare-and-swap. Wallets and table stacks therefore share a concurrency boundary across tables. A transactional D1 batch writes the aggregate, append-only ledger/hand records and idempotency record together. Each insert is guarded by the successful CAS marker; failed races retry from fresh state, and SQL errors roll back the complete transaction. A chip-supply invariant checks every commit. Mutation request IDs prevent duplicate buy-ins, cash-outs and adjustments, and reject changed-payload replays. Same-origin checks, streaming 8 KiB request limits, strict whole-chip validation and per-account read/write rate limits are enforced.
+One club aggregate is committed using a version compare-and-swap. Wallets, cash-table stacks and tournament prize reserves therefore share a concurrency boundary across tables. Tournament chip stacks have a separate conservation invariant. A transactional D1 batch writes the aggregate, append-only ledger/hand records and idempotency record together. Each insert is guarded by the successful CAS marker; failed races retry from fresh state, and SQL errors roll back the complete transaction. A chip-supply invariant checks every commit. Mutation request IDs prevent duplicate buy-ins, cash-outs and adjustments, and reject changed-payload replays. Same-origin checks, streaming 8 KiB request limits, strict whole-chip validation and per-account read/write rate limits are enforced.
 
 The SQL ledger is append-only through the application (no update/delete endpoints); database administrators remain trusted. This is a small private-club architecture, not a claim of immunity to compromise or a real-money platform. A compromised owner account can issue chips. Collusion and multiple accounts are not detected. ChatGPT/Sites manages authentication; protect the owner account accordingly. Back up the D1 database using your hosting provider’s tools.
 

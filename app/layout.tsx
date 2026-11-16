@@ -26,3 +26,4 @@ export default function RootLayout({
   );
 }
 import "./club-hub.css";
+import "./tournament.css";
