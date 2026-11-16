@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useTableMotion } from "../components/use-table-motion";
 import { ClubHub } from "../components/club-hub";
 import { PokerCard as Card } from "../components/poker-card";
 import { ArrowRight, Check, CircleHelp, Copy, DoorOpen, Link2, LoaderCircle, Menu, MessageSquare, RefreshCw, ShieldCheck, Volume2, VolumeX, X } from "lucide-react";
@@ -172,32 +173,7 @@ export default function Home() {
   const winnerText = room?.results.map(r => `${room.players.find(p => p.id === r.id)?.name} +${chips(r.amount)}`).join(" · ");
   const seconds = room?.deadline ? Math.min(45, Math.max(0, Math.ceil((room.deadline - now) / 1000))) : 0;
 
-  useLayoutEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene || !room) return;
-    const measure = () => {
-      const potElement = scene.querySelector<HTMLElement>(".pot");
-      const dealer = scene.querySelector<HTMLElement>(".seat:has(.dealer-button) .seat-cards");
-      if (!potElement) return;
-      const potRect = potElement.getBoundingClientRect(), dealerRect = dealer?.getBoundingClientRect() || potRect;
-      scene.querySelectorAll<HTMLElement>(".seat").forEach(seat => {
-        const cards = seat.querySelector<HTMLElement>(".seat-cards");
-        if (!cards) return;
-        const rect = cards.getBoundingClientRect();
-        seat.style.setProperty("--deal-x", `${dealerRect.left + dealerRect.width/2 - rect.left - rect.width/2}px`);
-        seat.style.setProperty("--deal-y", `${dealerRect.top + dealerRect.height/2 - rect.top - rect.height/2}px`);
-        seat.style.setProperty("--pot-x", `${potRect.left + potRect.width/2 - rect.left - rect.width/2}px`);
-        seat.style.setProperty("--pot-y", `${potRect.top + potRect.height/2 - rect.top - rect.height/2}px`);
-        const payout = seat.querySelector<HTMLElement>(".payout-chips");
-        if (payout) {const payoutRect = payout.getBoundingClientRect();seat.style.setProperty("--payout-x", `${potRect.left+potRect.width/2-payoutRect.left}px`);seat.style.setProperty("--payout-y", `${potRect.top+potRect.height/2-payoutRect.top}px`);}
-        const bet = seat.querySelector<HTMLElement>(".seat-bet");
-        if (bet) {const betRect = bet.getBoundingClientRect();seat.style.setProperty("--bet-x", `${potRect.left+potRect.width/2-betRect.left}px`);seat.style.setProperty("--bet-y", `${potRect.top+potRect.height/2-betRect.top}px`);}
-      });
-    };
-    measure(); let frame = 0;
-    const observer = new ResizeObserver(() => {cancelAnimationFrame(frame); frame = requestAnimationFrame(measure);}); observer.observe(scene);
-    return () => {observer.disconnect(); cancelAnimationFrame(frame);};
-  }, [room?.hand, room?.stage, room?.version, seated]);
+  const {dealing} = useTableMotion(sceneRef, room);
 
   return <div className={`app-shell room-environment ${room ? "playing" : "in-lobby"} ${logOpen ? "log-open" : ""}`} onClickCapture={event => { if (!sound || !(event.target as HTMLElement).closest("button")) return; const ctx = audioRef.current; if (!ctx) return; const o = ctx.createOscillator(); const g = ctx.createGain(); o.type="sine"; o.frequency.setValueAtTime(280,ctx.currentTime); o.frequency.exponentialRampToValueAtTime(90,ctx.currentTime+.07); g.gain.setValueAtTime(.035,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.08); o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.08); }}>
     <aside id="club-menu" aria-label="Game menu" className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
@@ -213,17 +189,17 @@ export default function Home() {
       <main>
         <div className="game-grid">
           <section className="table-panel" aria-label="Poker table">
-            <div ref={sceneRef} className={`table-scene ${room ? "in-game" : ""}`}>
+            <div ref={sceneRef} className={`table-scene ${room ? "in-game" : ""} ${dealing ? "is-dealing" : ""}`}>
               
               <div className="poker-table"><div className="felt-inner"/>
-                <div className="community"><span className="street-label">{room ? stageNames[room.stage] : "Texas Hold’em"}</span><div className="board">{Array.from({length: 5}, (_, i) => <Card value={room?.board[i]} key={`${room?.hand}-${i}-${room?.board[i] || "empty"}`}/>)}</div><div className="pot" key={`pot-${pot}`}><div className="physical-pot" aria-hidden="true">{Array.from({length: Math.min(5, Math.max(1, Math.ceil(pot/120)))}, (_, stack) => <span className={`chip-tower tower-${stack}`} key={stack}>{Array.from({length: Math.min(7, Math.max(2, Math.ceil(pot/30)))}, (_, chip) => <i key={chip} style={{bottom:chip*4}}/>)}</span>)}</div><span>{room?.stage === "showdown" ? "LAST POT" : "POT"}<strong>{chips(pot)}</strong></span></div></div>
+                <div className="community">{room?.stage === "showdown" && room.results.length > 0 ? <div className="hand-result" key={`${room.code}-${room.hand}`} role="status" aria-atomic="true"><span className="result-heading">{room.results.length === 1 ? `${room.players.find(p=>p.id===room.results[0].id)?.name || "Player"} wins` : `${room.results.length} players paid`}</span><span className="result-summary">{room.results.length === 1 ? `${room.results[0].hand} · +${chips(room.results[0].amount)}` : "Payouts recorded in hand history"}</span><span className="sr-only">{winnerText}</span></div> : <span className={`street-label ${dealing ? "dealing-label" : ""}`} role="status">{dealing ? `Dealing · ${room?.players[room.dealer]?.name || "dealer"}` : room ? stageNames[room.stage] : "Texas Hold’em"}</span>}<div className="board">{Array.from({length: 5}, (_, i) => <Card value={room?.board[i]} key={`${room?.hand}-${i}`}/>)}</div><div className="pot" key={`pot-${pot}`}><div className="physical-pot" aria-hidden="true">{Array.from({length: Math.min(5, Math.max(1, Math.ceil(pot/120)))}, (_, stack) => <span className={`chip-tower tower-${stack}`} key={stack}>{Array.from({length: Math.min(7, Math.max(2, Math.ceil(pot/30)))}, (_, chip) => <i key={chip} style={{bottom:chip*4}}/>)}</span>)}</div><span>{room?.stage === "showdown" ? "LAST POT" : "POT"}<strong>{chips(pot)}</strong></span></div></div>
               </div>
               {Array.from({length: 6}, (_, i) => {
-                const p = seated[i]; const turn = p && !p.departing && room?.turnId === p.id;
+                const p = nextSeats[i] || seated[i]; const turn = p && !p.departing && room?.turnId === p.id;
                 const dealer = p && room?.players[room.dealer]?.id === p.id;
                 const won = p && !p.departing && room?.results.some(r => r.id === p.id);
-                return <div key={`seat-${i}`} className={`seat seat-${i} ${p ? "occupied" : "vacant"} ${p?.departing ? "departing" : ""} ${p?.folded ? "folded" : ""} ${turn ? "on-turn" : ""} ${won ? "winner" : ""}`}>
-                  {p ? <>{((emote && p.id === room?.you) || (p.emote && (p.emoteUntil || 0) > now)) && <span className="emote-bubble">{EMOTES[(p.id === room?.you && emote ? emote : p.emote) || ""] || "Hello, table."}</span>}<div className="seat-cards" aria-hidden={p.folded || p.departing}>{p.cards.map((c, n) => <Card key={`${room?.hand}-${n}-${c}`} value={c} small/>)}</div><PlayerStation player={p} index={i} isYou={p.id === room?.you} active={!!turn} seconds={seconds}/><div className="seat-markers">{dealer && <span className="dealer-button" title="Dealer" aria-label="Dealer">D</span>}{(p.id === smallBlindId || p.id === bigBlindId) && <span className="blind-marker">{p.id === smallBlindId ? "SB" : "BB"}</span>}</div><span className={`seat-action ${won ? "won" : ""}`}>{won ? "WINNER" : p.waiting ? "Next hand" : (turn ? (p.id === room?.you ? "Your turn" : "Thinking…") : (["Small blind", "Big blind"].includes(p.lastAction) ? "" : p.lastAction))}</span>{p.bet > 0 && room?.stage !== "showdown" && <span className="seat-bet" key={`bet-${p.bet}`}><i className="bet-chip"/><i className="flying-chip" aria-hidden="true"/> {chips(p.bet)}</span>}{won && <span className="payout-chips" aria-hidden="true" key={`payout-${room?.hand}`}><i/><i/><i/></span>}</> : <><button className="empty-seat" disabled={busy || (!!room && !betweenHands)} aria-label={`Sit in seat ${i+1}`} title={room && !betweenHands ? "Change seats between hands" : "Sit here"} onClick={() => {if(room && me) command("seat", {seat:i});else if(room) {returnToClub();}else {returnToClub();}}}><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15"/><path d="M11 24V14q7-5 14 0v10M10 24h16M13 24v4m10-4v4"/></svg><span className="sit-label">Sit here</span></button></>}
+                return <div key={`seat-${i}`} data-player-id={p?.id} className={`seat seat-${i} ${p ? "occupied" : "vacant"} ${p?.departing ? "departing" : ""} ${p?.folded ? "folded" : ""} ${turn ? "on-turn" : ""} ${won ? "winner" : ""}`}>
+                  {p ? <>{((emote && p.id === room?.you) || (p.emote && (p.emoteUntil || 0) > now)) && <span className="emote-bubble">{EMOTES[(p.id === room?.you && emote ? emote : p.emote) || ""] || "Hello, table."}</span>}<div className="seat-cards" aria-hidden={p.folded || p.departing}>{p.cards.map((c, n) => <Card key={`${room?.hand}-${n}`} value={c} small/>)}</div><PlayerStation player={p} index={i} isYou={p.id === room?.you} active={!!turn} seconds={seconds}/><div className="seat-markers">{dealer && <span key={`dealer-${room?.hand}`} className="dealer-button" role="img" title={`Dealer: ${p.name}`} aria-label={`Dealer: ${p.name}`}>D</span>}{(p.id === smallBlindId || p.id === bigBlindId) && <span className="blind-marker">{p.id === smallBlindId ? "SB" : "BB"}</span>}</div><span className={`seat-action ${won ? "won" : ""}`}>{won ? "WINNER" : p.waiting ? "Next hand" : (turn ? (p.id === room?.you ? "Your turn" : "Thinking…") : (["Small blind", "Big blind"].includes(p.lastAction) ? "" : p.lastAction))}</span>{p.bet > 0 && room?.stage !== "showdown" && <span className="seat-bet" key={`bet-${p.bet}`}><i className="bet-chip"/> {chips(p.bet)}</span>}</> : <><button className="empty-seat" disabled={busy || (!!room && !betweenHands)} aria-label={`Sit in seat ${i+1}`} title={room && !betweenHands ? "Change seats between hands" : "Sit here"} onClick={() => {if(room && me) command("seat", {seat:i});else if(room) {returnToClub();}else {returnToClub();}}}><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15"/><path d="M11 24V14q7-5 14 0v10M10 24h16M13 24v4m10-4v4"/></svg><span className="sit-label">Sit here</span></button></>}
                 </div>;
               })}
 
