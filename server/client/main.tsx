@@ -1,0 +1,11 @@
+import {createRoot} from 'react-dom/client';
+import {LocalApp} from './local-app';
+import '../../app/globals.css';
+import '../../app/room.css';
+import '../../app/table-layout.css';
+import '../../app/club.css';
+import '../../app/table-tactile.css';
+import '../../app/club-hub.css';
+import '../../app/tournament.css';
+import './local.css';
+createRoot(document.getElementById('root')!).render(<LocalApp/>);

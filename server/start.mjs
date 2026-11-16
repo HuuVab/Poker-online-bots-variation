@@ -1,0 +1,10 @@
+import {resolve} from 'node:path';
+import {existsSync} from 'node:fs';
+import {createLocalServer} from './app.mjs';
+const port=Number(process.env.PORT||3000);
+if(!Number.isInteger(port)||port<1024||port>65535)throw new Error('PORT must be 1024–65535.');
+if(!existsSync(resolve('local-dist/index.html')))throw new Error('Run npm run build:local first.');
+const app=createLocalServer({filename:resolve(process.env.RIVERROOM_DB||'data/riverroom.sqlite')});
+app.server.on('error',async e=>{console.error(`Could not start localhost server: ${e.code||e.message}`);await app.close();process.exitCode=1;});
+app.server.listen(port,'127.0.0.1',()=>console.log(`Riverroom server: http://localhost:${port}\nDatabase: ${resolve(process.env.RIVERROOM_DB||'data/riverroom.sqlite')}\nOpen the page to create your admin account. Ctrl+C stops the server.`));
+let stopping=false;for(const signal of ['SIGINT','SIGTERM'])process.on(signal,async()=>{if(stopping)return;stopping=true;await app.close();process.exit(0);});

@@ -34,4 +34,4 @@ Every ticket/point change and its resource audit record commit in the same aggre
 
 No payment credentials, checkout or receipt-trust endpoints are added. A later gateway should grant tickets only after a verified server-to-server payment notification, using a unique provider transaction ID and the same atomic resource/idempotency boundary. Client redirects or client-supplied balances must never grant tickets.
 
-Positive-win scoring is a game score, not an anti-collusion system: repeated play can increase points, and chip dumping/multiple accounts are not detected. Owner/admin and database access remain trusted. The existing authenticated-polling scheduling limitation is unchanged.
+Positive-win scoring is a game score, not an anti-collusion system: repeated play can increase points, and chip dumping/multiple accounts are not detected. Owner/admin and database access remain trusted. Hosted mode retains authenticated-polling scheduling; standalone localhost mode runs its own one-second game clock.

@@ -1,0 +1,8 @@
+"use client";
+import {useState} from 'react';
+export type GameSettings={regularStack:number;smallBlind:number;bigBlind:number;turnSeconds:number;tournamentPoints:number};
+export function GameSettingsForm({settings,busy,run}:{settings:GameSettings;busy:boolean;run:(action:string,extra?:Record<string,unknown>)=>Promise<void>}){
+ const [values,setValues]=useState(settings);
+ const fields:[keyof GameSettings,string,number,number][]=[['regularStack','Regular starting chips',100,1000000],['smallBlind','Regular small blind',1,50000],['bigBlind','Regular big blind',2,100000],['turnSeconds','Regular seconds per action',10,120],['tournamentPoints','Default Tournament prize points per entry',1,1000000]];
+ return <section aria-label="Game settings"><h3>Game defaults</h3><p>These defaults apply to newly created tables and tournament registrations. Existing games keep their settings. Entries and eligible rebuys always use one matching ticket.</p><form className="club-form" onSubmit={e=>{e.preventDefault();run('settings',{settings:values});}}>{fields.map(([key,label,min,max])=><label key={key}>{label}<input type="number" required step={1} min={min} max={max} value={values[key]} onChange={e=>setValues({...values,[key]:Number(e.target.value)})}/></label>)}<p>Big blind must be at least twice the small blind; starting chips must cover at least 10 big blinds.</p><p>Tournaments keep the club rules: 5,000 chips, 15-minute levels, 20-second actions, two +20s time cards, BB ante, rebuys through Level 6, and one 10-minute break.</p><button className="primary-btn" disabled={busy}>Save game defaults</button></form></section>;
+}

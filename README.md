@@ -2,7 +2,24 @@
 
 An invitation-only, ticket-entry Texas Hold’em club with 2–6-player regular tables, isolated bot practice, and tournaments for up to 27 players across three nine-seat tables.
 
-## Club setup
+## Run on your Windows PC (localhost)
+
+```powershell
+cd D:\Poker\river-room
+npm ci
+npm run build:local
+npm start
+```
+
+Open **http://localhost:3000** and create your admin account. There is no default login. The server binds to **127.0.0.1 only**, so this release is accessible only on your own PC. Node.js 24+ is required. No Cloudflare account or ChatGPT sign-in is needed for this mode.
+
+The admin creates player accounts using the shield button (**Account and server management**) in the top bar, manages access/roles, resets player passwords, and grants Regular/Tournament tickets in **Members**. **Settings** changes starting chips, blinds, action duration and default tournament prize points for new games. Existing tables/events retain their settings. Gameplay remains server-authoritative.
+
+Local SQLite data lives in `data/riverroom.sqlite`; migrations run automatically. Accounts, salted password hashes, sessions, games, tickets, points and history survive restart. No hosted or demo database is imported. The one-second server clock advances hands and tournament timers without browser polling while the process is running. Keep the terminal and PC awake; press Ctrl+C for a clean stop. `npm run start:local` builds and starts in one command.
+
+See [docs/LOCAL-SERVER.md](docs/LOCAL-SERVER.md) for account management, settings, backup, ports and limitations. The Cloudflare/Sites path below is retained separately (`npm run start:sites`).
+
+## Hosted club setup
 
 The production `CLUB_OWNER_EMAIL` runtime secret selects the only account allowed to initialize the club. Sign in with ChatGPT and choose **Open private club**. The owner identity is then pinned to the verified Site user ID. An unset owner configuration fails closed; the first visitor cannot claim ownership.
 
@@ -38,19 +55,19 @@ Open **Tournaments** in the club book. Hosts create events requiring one Tournam
 - Tournament stacks cannot use regular-table entry, rebuy, leave, seat-move or host kick endpoints. Unregister/cancel before starting returns the matching entry ticket and removes its prize-point contribution. A running tournament cannot be cancelled by its host.
 - Unanimous remaining-player approval pauses between hands. Resume shifts clocks and deadlines. A club membership suspension/removal pauses the event for review instead of silently forfeiting that player’s stack.
 
-The server advances events on authenticated club/table polling. If anyone has the club or table open, all tournament tables progress. When every viewer disconnects, saved gameplay resumes on return; the wall-clock blind schedule still advances. This deployment does not install an unattended timer service. Real production multi-device and load testing remain separate from local SQLite and browser QA.
+Hosted mode advances events on authenticated club/table polling; local mode has a dedicated one-second server clock. If anyone has the club or table open, all tournament tables progress. When every viewer disconnects, saved gameplay resumes on return; the wall-clock blind schedule still advances. The hosted deployment does not install an unattended timer service. Real production multi-device and load testing remain separate from local SQLite and browser QA.
 
 The full rules and schedule are also available in the lobby and tournament help dialog. See [docs/TOURNAMENT-RULES.md](docs/TOURNAMENT-RULES.md) for the state machine, accounting and validation details.
 
 ## Architecture and security boundaries
 
-React/Vinext on a Cloudflare Worker with D1. `/api/table` obtains identity from the Sites verified authentication helper; no browser-supplied account ID, role, balance or old seat bearer token authenticates a player. The poker engine deals and settles on the server. Responses redact opponent hole cards, deck, account IDs and internal accounting state, including for table managers.
+Local mode serves the existing React game through Node HTTP and SQLite. Hosted mode uses React/Vinext on a Cloudflare Worker with D1. `/api/table` obtains identity from the Sites verified authentication helper; no browser-supplied account ID, role, balance or old seat bearer token authenticates a player. The poker engine deals and settles on the server. Responses redact opponent hole cards, deck, account IDs and internal accounting state, including for table managers.
 
 One club aggregate is committed using a version compare-and-swap. Mode-specific tickets, points, regular stacks and tournament prize reserves share a concurrency boundary across tables. Every resource change must match its mode/resource audit delta. Each regular table conserves chips issued = held stacks + live contributions + retired chips; tournament chips have their own conservation invariant. A transactional D1 batch writes the aggregate, append-only ledger/hand records and idempotency record together. Inserts are guarded by the successful CAS marker; failed races retry and SQL errors roll back the transaction. Request IDs prevent duplicate grants, entries, rebuys and point awards, rejecting changed-payload replays. Same-origin checks, streaming 8 KiB limits, whole-number validation and per-account rate limits remain enforced.
 
 The SQL ledger is append-only through the application (no update/delete endpoints); database administrators remain trusted. This is a small private-club architecture, not a claim of immunity to compromise or a real-money platform. A compromised owner account can grant tickets. Hosts choose the published tournament point contribution before registration. Collusion and multiple accounts are not detected. ChatGPT/Sites manages authentication; protect the owner account accordingly. Back up the D1 database using your hosting provider’s tools.
 
-Clients poll tables every 1.2 seconds and the club every 5 seconds. Turn deadlines advance on an authenticated poll, so an abandoned table resumes its expired turns when someone next opens the club. This implementation serializes club writes and caps open tables at 30 and members at 250; it is intended for friends, not high-volume public play. History responses show the latest 100 ticket/point ledger entries. The aggregate has a storage ceiling and preserves closed table identities for idempotent retries.
+Hosted clients poll tables every 1.2 seconds and the club every 5 seconds. Turn deadlines advance on an authenticated poll, so an abandoned table resumes its expired turns when someone next opens the club. This implementation serializes club writes and caps open tables at 30 and members at 250; it is intended for friends, not high-volume public play. History responses show the latest 100 ticket/point ledger entries. The aggregate has a storage ceiling and preserves closed table identities for idempotent retries.
 
 ## Local development
 
