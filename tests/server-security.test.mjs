@@ -58,6 +58,11 @@ test('attack: cross-site and rebinding requests cannot mutate data or expose adm
  assert.equal((await f.raw('/api/local/admin',{headers:{Host:'evil.example',Cookie:f.owner.cookie}})).status,403);assert.equal((await f.owner.send('/api/local/session')).data.user.admin,true);
 });
 
+test('attack: local mode refuses accidental proxy or tunnel access even with a valid local cookie',async t=>{
+ const f=await fixture(t);for(const headers of [{'X-Forwarded-Proto':'https'},{'X-Forwarded-For':'203.0.113.10'},{'Cf-Connecting-Ip':'203.0.113.10'},{Forwarded:'for=203.0.113.10;proto=https'}])assert.equal((await f.owner.send('/api/local/session',undefined,headers)).status,403);
+ assert.equal((await f.owner.send('/api/local/session')).data.user.admin,true);
+});
+
 test('attack: source paths, database paths, malformed JSON and oversized bodies are refused',async t=>{
  const f=await fixture(t);for(const path of ['/server/app.mjs','/data/riverroom.sqlite','/.env','/%2e%2e/server/auth.mjs','/..%5cserver/auth.mjs','/assets/../../server/auth.mjs'])assert.equal((await f.raw(path)).status,404,path);
  for(const body of ['null','[]','"text"','{bad json'])assert.equal((await f.raw('/api/local/login',{method:'POST',body})).status,400);

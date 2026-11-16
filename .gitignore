@@ -47,3 +47,8 @@ yarn-error.log*
 # Standalone localhost build and private server database
 /local-dist/
 /data/
+
+# Private hosting configuration
+/server/public.env
+/server/cloudflared.yml
+*.rrbackup

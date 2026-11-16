@@ -104,3 +104,8 @@ See [docs/TEST-SCENARIOS.md](docs/TEST-SCENARIOS.md) for 120 prioritized scenari
 ## Security attack regression
 
 The standalone server has controlled attack regression tests for spoofed sessions, privilege escalation, resource tampering, SQL/prototype payloads, replay races, Origin/Host checks, private file paths, malformed bodies and slow/incomplete requests. See [docs/SECURITY-ATTACK-TEST.md](docs/SECURITY-ATTACK-TEST.md) for the confirmed availability finding, fix, results and scope limits.
+
+
+## Private public-hosting preparation
+
+The standalone server now includes a fail-closed public profile with signed Access JWT validation, HTTPS secure cookies, gateway-bound sessions, idle expiry, admin authenticator/recovery codes and recent-auth checks. It also includes encrypted verified backups, local security events/alerts, clock-priority scheduling, private-storage checks and a restart supervisor. Nothing is publicly exposed yet: the domain will be purchased later and the admin must enroll their own authenticator. See [docs/PUBLIC-HOSTING.md](docs/PUBLIC-HOSTING.md) and `npm run security:check` for the remaining deployment steps.

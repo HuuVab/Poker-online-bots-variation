@@ -15,6 +15,11 @@ export function openDatabase(filename){
  CREATE TABLE IF NOT EXISTS local_sessions (token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES local_users(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL, created_at INTEGER NOT NULL);
  CREATE INDEX IF NOT EXISTS local_session_user ON local_sessions(user_id);
  CREATE TABLE IF NOT EXISTS local_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);`);
+ sql.exec(`CREATE TABLE IF NOT EXISTS local_session_security (token_hash TEXT PRIMARY KEY REFERENCES local_sessions(token_hash) ON DELETE CASCADE, binding TEXT NOT NULL, mfa INTEGER NOT NULL, elevated_until INTEGER NOT NULL, last_seen INTEGER NOT NULL);
+ CREATE TABLE IF NOT EXISTS local_mfa (user_id TEXT PRIMARY KEY REFERENCES local_users(id), secret TEXT NOT NULL, last_counter INTEGER NOT NULL, recovery TEXT NOT NULL);
+ CREATE TABLE IF NOT EXISTS local_mfa_pending (user_id TEXT PRIMARY KEY REFERENCES local_users(id), secret TEXT NOT NULL, expires_at INTEGER NOT NULL);
+ CREATE TABLE IF NOT EXISTS local_security_events (id TEXT PRIMARY KEY, created_at INTEGER NOT NULL, event TEXT NOT NULL, actor TEXT, status INTEGER NOT NULL);
+ CREATE INDEX IF NOT EXISTS local_security_time ON local_security_events(created_at);`);
  const db={sql,prepare(query){return{bind(...args){return{query,args,async first(){return sql.prepare(query).get(...args)??null;},async all(){return{results:sql.prepare(query).all(...args)};}};}};},async batch(statements){
   sql.exec('SAVEPOINT club_batch');try{const result=statements.map(s=>({meta:{changes:Number(sql.prepare(s.query).run(...s.args).changes)}}));sql.exec('RELEASE club_batch');return result;}catch(e){sql.exec('ROLLBACK TO club_batch; RELEASE club_batch');throw e;}
  }};return db;

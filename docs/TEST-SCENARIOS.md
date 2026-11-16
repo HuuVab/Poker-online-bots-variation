@@ -270,3 +270,8 @@ Local browser checks verified owner grants in both modes, isolated balances, Reg
 ## Standalone localhost server
 
 Local server integration tests use real HTTP requests on loopback, isolated SQLite databases, and independent sessions. They verify one-time admin bootstrap, salted password hashes, forged identity/cookie rejection, Origin and Host checks, admin-only account creation and SQL rollback, suspension and session revocation, password changes/resets, saved settings validation and existing-game preservation, autonomous turn expiry/points, interval-driven progress without clients, session expiration/rate limits, and database/session restart persistence. Browser QA verified local login, account listing/reset forms, game defaults saved through the UI, table creation, the existing game view, no console errors, and a 390px settings view without horizontal overflow. User-facing setup uses a separate clean database and no preset admin password.
+
+
+## Public-profile security preparation
+
+Synthetic signed-gateway tests cover exact domain/issuer/audience validation, invalid/expired token denial, identity-bound secure sessions, admin MFA/replay and recovery, recent admin confirmation, idle expiry, public setup refusal, redacted audit events, loopback health checks, authenticated backup encryption/restore and tamper rejection. A separate HTTP fixture handles 27 distinct sessions, three full tables and 54 simultaneous polls; observed median/p95 was about 237/240 ms on the local machine, which is not a remote-network capacity guarantee. Real domain, Access policy, tunnel, MFA enrollment by the operator, off-device backup/alert destinations and external-device testing remain deployment steps.

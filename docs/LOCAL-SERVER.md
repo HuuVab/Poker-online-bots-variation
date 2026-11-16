@@ -11,13 +11,13 @@ npm run build:local
 npm start
 ```
 
-Open http://localhost:3000. `npm run start:local` combines the build and start steps; later restarts only require `npm start`. Keep the terminal running. Ctrl+C closes the HTTP server and database cleanly. This is a local-only release: there is no LAN/internet listener, tunnel, router setting, or firewall rule.
+Open http://localhost:3000. `npm run start:local` combines the build and start steps; later restarts only require `npm start`. Keep the terminal running. Ctrl+C closes the HTTP server and database cleanly. The default remains local-only. A separate hardened public profile is implemented but not activated; see PUBLIC-HOSTING.md. No tunnel, router setting, firewall rule, or real domain is configured.
 
 The existing Cloudflare/Sites build and `npm run start:sites` remain separate. Local mode uses a standalone Vite-built React client plus Node's HTTP/SQLite APIs, reusing the authoritative poker/economy modules. It needs neither Cloudflare credentials nor ChatGPT authentication.
 
 ## Admin and players
 
-On the first visit, create your own admin name, email, password, and club name. No default credentials are installed. Setup closes after the first successful admin creation; the admin ID is pinned in the database. This is a local login: email is an identifier, and no verification or email delivery is performed.
+On the first visit, create your own admin name, email, password, and club name. No default credentials are installed. Admin authenticator enrollment is available and mandatory before public mode. Setup closes after the first successful admin creation; the admin ID is pinned in the database. This is a local login: email is an identifier, and no verification or email delivery is performed.
 
 Use the shield button in the game's top bar (**Account and server management**):
 
@@ -53,7 +53,7 @@ The starting stack must cover at least 10 BB. Existing tables keep the settings 
 
 An internal clock runs every second, advancing all tables even without connected browsers. It calls the same transaction/invariant code as player actions and does not spend a player's read-rate allowance. Practice bot tables also progress. Regular hosts still choose when to deal the next hand; tournament hands start automatically under the existing rules. The clock stops when the process stops or the PC sleeps. On restart, saved deadlines resume; tournament wall-clock blind schedules can advance. This is not an always-on Windows service.
 
-Stop the server before copying the entire `data` folder for a backup. Keep SQLite `-wal`/`-shm` sidecars if present. Password/session data is sensitive and must not be committed or shared publicly. The SQLite file is not encrypted; Windows account and disk protection remain the operator's responsibility.
+Stop the server before copying the entire `data` folder for a backup. Keep SQLite `-wal`/`-shm` sidecars if present. Password/session data is sensitive and must not be committed or shared publicly. Automatic backup snapshots are encrypted, while the live SQLite file is not encrypted; Windows account and disk protection remain the operator's responsibility.
 
 Optional PowerShell configuration:
 
@@ -67,9 +67,14 @@ The host remains fixed at 127.0.0.1. Use one server process per database. To upd
 
 ## Boundaries
 
-Local mode ignores browser identity/role headers and uses authenticated server sessions. Host and Origin checks block off-site mutation and DNS-rebinding hostnames. CSP/frame restrictions, bounded JSON bodies and the existing game authorization, replay, CAS and audit protections remain active. It does not provide multi-factor authentication, password-reset email, anti-collusion, TLS, remote hosting or a security audit. Do not expose this HTTP listener through a proxy/tunnel as an internet service without implementing and testing the remote-hosting security setup.
+Local mode ignores browser identity/role headers and uses authenticated server sessions. Host and Origin checks block off-site mutation and DNS-rebinding hostnames. CSP/frame restrictions, bounded JSON bodies and the existing game authorization, replay, CAS and audit protections remain active. Admin MFA and the hardened proxy profile are documented in PUBLIC-HOSTING.md. It does not provide password-reset email, anti-collusion, an active public deployment, or a comprehensive security audit. Do not expose this HTTP listener through a proxy/tunnel as an internet service without implementing and testing the remote-hosting security setup.
 
 
 ## Attack regression checks
 
 See [SECURITY-ATTACK-TEST.md](SECURITY-ATTACK-TEST.md) for the controlled attack simulation and its confirmed availability fix. Network bodies are read outside the serialized game/database queue, with a three-second deadline, 8 KiB body limit, and 32-reader cap. The operation queue is limited to 64 pending operations and the listener to 128 connections. These are local resource bounds, not a public-scale denial-of-service guarantee.
+
+
+## Hardened public profile
+
+See [PUBLIC-HOSTING.md](PUBLIC-HOSTING.md). Local mode is still the default. Public mode requires a real HTTPS domain, signed private Access gateway identities, private Windows storage ACLs, and verified admin MFA. `npm run security:check` reports prerequisites; `npm run serve:managed` provides monitored restart. Startup and six-hourly backups are encrypted and verified, with 14 retained snapshots.

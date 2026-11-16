@@ -21,13 +21,14 @@ The handler now reads bounded network input outside the database queue. Bodies h
 | Forged chip stack, tickets, points, hole cards and illegal bets | Rejected or ignored; fixed server stack and balances retained |
 | Reading opponent cards, deck and internal accounting in game responses | Opponent cards redacted; tested private fields absent |
 | Concurrent replay of the same entry and races spending the last ticket | Exactly one entry/charge per request ID; one ticket cannot fund two entries |
+| Accidental proxy/tunnel access in local mode | Refused even with a valid local session |
 | Off-site/missing/null Origin, cross-site fetch metadata and rebinding Host | Rejected; existing session remained valid |
 | Paths targeting server source, database and dotfiles | Not served |
 | Malformed JSON, invalid URL escapes, oversized declared/chunked bodies | Rejected; server remained usable |
 | Slow or unfinished login body | Other API requests and the clock remain usable after fix |
 | Excess simultaneous incomplete bodies | Excess requests receive 429; normal requests and ticks remain usable |
 
-Run `node --test tests/server-security.test.mjs` for these ten attack groups. Run `npm test` for the complete regression suite. These tests require loopback networking; restrictive execution sandboxes may require network permission even though no external service is contacted.
+Run `node --test tests/server-security.test.mjs` for these eleven attack groups. Run `npm test` for the complete regression suite. These tests require loopback networking; restrictive execution sandboxes may require network permission even though no external service is contacted.
 
 ## Limits
 

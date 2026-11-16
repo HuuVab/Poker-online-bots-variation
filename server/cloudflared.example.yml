@@ -1,0 +1,15 @@
+# Configuration template only: no tunnel or DNS records are created by this file.
+# Create an Access application with an explicit email allowlist BEFORE routing this hostname.
+tunnel: REPLACE_WITH_TUNNEL_ID
+credentials-file: C:\REPLACE\WITH\PRIVATE\TUNNEL-CREDENTIALS.json
+ingress:
+  - hostname: poker.your-domain.example
+    service: http://127.0.0.1:3000
+    originRequest:
+      httpHostHeader: poker.your-domain.example
+      access:
+        required: true
+        teamName: REPLACE_WITH_TEAM_NAME
+        audTag:
+          - REPLACE_WITH_APPLICATION_AUD
+  - service: http_status:404
