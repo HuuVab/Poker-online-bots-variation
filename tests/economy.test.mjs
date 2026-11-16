@@ -1,9 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync,readdirSync} from 'node:fs';
 import {alice,bob,send,setup,table,state,database} from './support/club.mjs';
 const raw=db=>JSON.parse(db.sql.prepare("SELECT state FROM clubs WHERE id='main'").get().state);
 const save=(db,c)=>db.sql.prepare("UPDATE clubs SET state=? WHERE id='main'").run(JSON.stringify(c));
 const grant=(db,mode='regular',amount=1,memberId='alice',extra={})=>send(db,{action:'grant-tickets',mode,amount,memberId,reason:'Ticket test grant',...extra});
+
+test('version 2 wallet archives are purged without resetting tickets or points',async()=>{
+ const db=await setup(),c=raw(db);c.economyVersion=2;c.members.alice.legacyWallet=7000;c.members.bob.wallet=123;c.members.alice.points.regular=45;save(db,c);
+ const r=await send(db,{action:'status'});assert.equal(r.status,200);const after=raw(db);assert.equal(after.economyVersion,3);assert.equal(after.members.alice.tickets.regular,5000);assert.equal(after.members.alice.points.regular,45);assert.ok(Object.values(after.members).every(m=>!('wallet' in m)&&!('legacyWallet' in m)));db.sql.close();
+});
+
+test('SQL purge deletes all archived member wallets and wallet-only ledger rows, retaining resource history',()=>{
+ const db=new DatabaseSync(':memory:');for(const f of readdirSync(new URL('../drizzle/',import.meta.url)).filter(f=>f.endsWith('.sql')&&f<'0004').sort())db.exec(readFileSync(new URL('../drizzle/'+f,import.meta.url),'utf8'));
+ const members={'member.with.dot':{wallet:123,legacyWallet:456,tickets:{regular:2,tournament:3},points:{regular:4,tournament:5}},'quoted"id':{legacyWallet:789,status:'suspended'}};
+ db.prepare('INSERT INTO clubs VALUES (?,?,?,?,?)').run('main',JSON.stringify({members,economyVersion:2}),1,'test',0);
+ const insert=db.prepare('INSERT INTO club_ledger (id,member_id,actor_id,kind,wallet_delta,table_delta,wallet_after,reason,created_at,mode,resource,resource_delta,resource_after) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)');
+ insert.run('old','a','a','owner_adjustment',100,0,100,'Retired wallet',0,null,null,null,null);insert.run('new','a','a','admin_ticket_grant',0,0,0,'Keep ticket grant',0,'regular','tickets',2,2);
+ db.exec(readFileSync(new URL('../drizzle/0004_remove_player_wallets.sql',import.meta.url),'utf8'));
+ const c=JSON.parse(db.prepare('SELECT state FROM clubs').get().state);assert.ok(Object.values(c.members).every(m=>!('wallet' in m)&&!('legacyWallet' in m)));assert.deepEqual(c.members['member.with.dot'].tickets,{regular:2,tournament:3});assert.deepEqual(c.members['member.with.dot'].points,{regular:4,tournament:5});assert.deepEqual(db.prepare('SELECT id FROM club_ledger').all().map(r=>r.id),['new']);assert.ok(db.prepare('PRAGMA table_info(club_ledger)').all().every(c=>!c.name.startsWith('wallet_')));db.close();
+});
 
 test('new members start with independent zero tickets and points, and no wallet is exposed',async()=>{
  const db=database();let r=await send(db,{action:'setup',name:'Ticket club'});
@@ -50,10 +67,10 @@ test('zero-stack regular rebuy consumes one ticket, preserves points and cannot 
  assert.equal((await send(db,{...b,requestId:crypto.randomUUID()})).status,400);assert.equal((await send(db,{action:'rebuy',code,amount:900000})).status,400);db.sql.close();
 });
 
-test('legacy wallets are archived once without conversion; active chips and hand accounting survive migration',async()=>{
+test('legacy wallets are deleted without conversion; active chips and hand accounting survive migration',async()=>{
  const db=await setup(),code=await table(db);await send(db,{action:'join',code});await send(db,{action:'join',code},bob);await send(db,{action:'deal',code});let c=raw(db);delete c.economyVersion;for(const m of Object.values(c.members)){m.wallet=7000;delete m.tickets;delete m.points;}delete c.tables[code].chipsIssued;delete c.tables[code].chipsRetired;save(db,c);
- let q=await state(db,code);assert.equal(q.status,200,q.error);c=raw(db);assert.equal(c.economyVersion,2);assert.equal(c.members.alice.legacyWallet,7000);assert.equal(c.tables[code].chipsIssued,4000);assert.deepEqual(c.members.alice.tickets,{regular:0,tournament:0});assert.ok(!JSON.stringify(q).includes('legacyWallet'));assert.ok(!('wallet' in q.room));
- q=await send(db,{action:'act',code,version:q.room.version,move:'fold'});assert.equal(q.status,200,q.error);assert.equal(raw(db).members.bob.points.regular,10);await grant(db);await state(db,code);assert.equal(raw(db).members.alice.tickets.regular,1);assert.equal(raw(db).members.alice.legacyWallet,7000);db.sql.close();
+ let q=await state(db,code);assert.equal(q.status,200,q.error);c=raw(db);assert.equal(c.economyVersion,3);assert.ok(!('legacyWallet' in c.members.alice));assert.ok(!('wallet' in c.members.alice));assert.equal(c.tables[code].chipsIssued,4000);assert.deepEqual(c.members.alice.tickets,{regular:0,tournament:0});assert.ok(!JSON.stringify(q).includes('legacyWallet'));assert.ok(!('wallet' in q.room));
+ q=await send(db,{action:'act',code,version:q.room.version,move:'fold'});assert.equal(q.status,200,q.error);assert.equal(raw(db).members.bob.points.regular,10);await grant(db);await state(db,code);assert.equal(raw(db).members.alice.tickets.regular,1);assert.ok(!('legacyWallet' in raw(db).members.alice));db.sql.close();
 });
 
 test('resource history excludes retired wallet fields and other members cannot inspect it',async()=>{

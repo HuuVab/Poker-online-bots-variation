@@ -29,6 +29,13 @@
       "when": 1794815615930,
       "tag": "0003_mode_resources",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1794816573898,
+      "tag": "0004_remove_player_wallets",
+      "breakpoints": true
     }
   ]
 }

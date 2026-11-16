@@ -59,7 +59,7 @@ Requires Node.js 24+ (tests use built-in SQLite).
 ```powershell
 npm ci
 npm run build
-# Upgrade an existing database: apply ONLY unapplied migrations; this release adds 0003_mode_resources.sql.
+# Upgrade an existing database: apply ONLY unapplied migrations; apply 0003_mode_resources.sql and then 0004_remove_player_wallets.sql.
 # Fresh database: apply each migration once, in filename order.
 Get-ChildItem drizzle/*.sql | Sort-Object Name | ForEach-Object {
   node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file $_.FullName

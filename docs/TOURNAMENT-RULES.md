@@ -85,7 +85,7 @@ Operational bounds remain five live tournaments, 30 live club tables total, 250 
 - Active point reserve = prize pool; completed reserve + awarded points = prize pool; cancelled reserve = zero.
 - Tournament stacks + live contributions + antes = chips issued through entries and rebuys.
 - Point awards and ticket consumption share the aggregate CAS and transactional ledger boundary.
-- Legacy wallets are archived without conversion. See TICKETS-AND-POINTS.md for upgrade behavior.
+- Legacy wallet balances and wallet-only ledger history are removed without conversion. See TICKETS-AND-POINTS.md for upgrade behavior.
 
 ## Validation
 
