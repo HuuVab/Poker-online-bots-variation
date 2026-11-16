@@ -68,3 +68,8 @@ The host remains fixed at 127.0.0.1. Use one server process per database. To upd
 ## Boundaries
 
 Local mode ignores browser identity/role headers and uses authenticated server sessions. Host and Origin checks block off-site mutation and DNS-rebinding hostnames. CSP/frame restrictions, bounded JSON bodies and the existing game authorization, replay, CAS and audit protections remain active. It does not provide multi-factor authentication, password-reset email, anti-collusion, TLS, remote hosting or a security audit. Do not expose this HTTP listener through a proxy/tunnel as an internet service without implementing and testing the remote-hosting security setup.
+
+
+## Attack regression checks
+
+See [SECURITY-ATTACK-TEST.md](SECURITY-ATTACK-TEST.md) for the controlled attack simulation and its confirmed availability fix. Network bodies are read outside the serialized game/database queue, with a three-second deadline, 8 KiB body limit, and 32-reader cap. The operation queue is limited to 64 pending operations and the listener to 128 connections. These are local resource bounds, not a public-scale denial-of-service guarantee.

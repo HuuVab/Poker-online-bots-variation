@@ -99,3 +99,8 @@ Tests cover poker evaluation, blind order, short all-ins, side pots, ties, 300 r
 ## Full test matrix
 
 See [docs/TEST-SCENARIOS.md](docs/TEST-SCENARIOS.md) for 120 prioritized scenarios, execution status, known verification limits, and the manual release checklist. Run `npm run test:exhaustive` for the complete five-card category check.
+
+
+## Security attack regression
+
+The standalone server has controlled attack regression tests for spoofed sessions, privilege escalation, resource tampering, SQL/prototype payloads, replay races, Origin/Host checks, private file paths, malformed bodies and slow/incomplete requests. See [docs/SECURITY-ATTACK-TEST.md](docs/SECURITY-ATTACK-TEST.md) for the confirmed availability finding, fix, results and scope limits.
