@@ -58,7 +58,7 @@ test('suspension freezes access, preserves wallet, and revoked invitations canno
  await send(db,{action:'invite',email:eve.email,role:'member'});await send(db,{action:'revoke',email:eve.email});assert.equal((await send(db,{action:'accept'},eve)).status,403);db.sql.close();
 });
 test('practice cannot mint or transfer wallet chips; free funded rebuy removed',async()=>{
- const db=await setup();let r=await send(db,{action:'create',practice:true});assert.equal(r.status,200);assert.equal(r.club.member.wallet,5000);assert.equal((await state(db,r.code,bob)).status,403);await send(db,{action:'leave',code:r.code});assert.equal((await send(db,{action:'status'})).club.member.wallet,5000);
+ const db=await setup();let r=await send(db,{action:'create',practice:true});assert.equal(r.status,200);assert.equal(r.club.member.wallet,5000);assert.equal((await state(db,r.code,bob)).status,403);await send(db,{action:'leave',code:r.code});assert.equal((await send(db,{action:'status'})).club.member.wallet,5000);assert.equal((await send(db,{action:'create',practice:true})).status,200);
  const code=await table(db);await send(db,{action:'join',code,amount:400});assert.equal((await send(db,{action:'rebuy',code})).status,400);assert.equal((await send(db,{action:'rebuy',code,amount:100000})).status,400);db.sql.close();
 });
 test('request bounds, origin protection, rate limits and ledger visibility',async()=>{
