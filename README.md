@@ -58,3 +58,7 @@ npm run build
 ```
 
 Tests cover poker evaluation, blind order, short all-ins, side pots, ties, 300 randomized hands, verified membership and roles, concurrent cross-table spending, idempotent retries, SQL rollback, wallet reconciliation, all-in departures, deferred closure, kick fairness, suspension, practice isolation, request bounds and rate limits.
+
+## Full test matrix
+
+See [docs/TEST-SCENARIOS.md](docs/TEST-SCENARIOS.md) for 120 prioritized scenarios, execution status, known verification limits, and the manual release checklist. Run `npm run test:exhaustive` for the complete five-card category check.
