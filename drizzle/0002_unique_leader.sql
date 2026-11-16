@@ -1,0 +1,1 @@
+CREATE INDEX `club_ledger_member_time` ON `club_ledger` (`member_id`,`created_at`);
